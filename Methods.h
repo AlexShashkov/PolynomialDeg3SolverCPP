@@ -38,7 +38,7 @@ class Baydoun
 		number c0d0 = c[0]*d[0];
 		number b0c0 = b[0]*c[0];
 		number b0c1 = b[0]*c[1];
-		number b1c1 = b[1]*c[1]*4;
+		number b1c1 = b[1]*c[1]*4L;
 		number t = c[2]*(16*b[5] + 72*d[1] + 264*b[2]*d[0]  + 66*b[1]*c[1] - \
 		    132*b[0]*c0d0 + 2*c[2]) + b[3]*c[0]*(12*d[1] - 84*c[2]) - b[1] * \
 		    c[1]*d[0]*(24*b[2]+291*d[0]) + d[2]*(144*b0c0 - 27*d[0] - 2*b[2]);
@@ -50,20 +50,20 @@ class Baydoun
 
 		std::complex<number> sqrt1;
 		if (o > 0)
-		    sqrt1 = pow(std::complex<number>(o, 0), 0.5);
+		    sqrt1 = pow(std::complex<number>(o, 0), 0.5L);
 		else
-		    sqrt1 = std::complex<number>(0, 1)*pow(std::complex<number>(abs(o), 0), 0.5);
+		    sqrt1 = std::complex<number>(0, 1)*pow(std::complex<number>(abs(o), 0), 0.5L);
 		std::cout << "_P2 sqrt1 " << sqrt1 << "\n";
 		std::complex<number> sqrt2 = std::complex<number>(0, 1)*sqrt3;
 		std::complex<number> sqrt3 = cbrt4;
 
 		auto sqrt2div3 = sqrt2*onethree;
 		auto sqrt2div9 = sqrt2*onethree*onethree;
-		auto sqrt3ftwo = sqrt3*0.5;
+		auto sqrt3ftwo = sqrt3*0.5L;
 
 		auto bl = (d[0]-b0c0) * sqrt1 * (b1c1 - 4*b[0]*c0d0 + 2*c[2] + d[1]) +sqrt2div9*t;
 		auto bl1 = pow(bl, onethree);
-		auto bl2 = pow(bl1, 2);
+		auto bl2 = pow(bl1, 2L);
 		auto A1 = (-sqrt2div3)*(8*b[2]*c[0] - 4*d[0]*b[1] - 26*b0c1 + 30*c0d0) + 2*c[0]*sqrt1;
 		auto A2 = 8*(b[4]*c[1] - b[3]*c0d0) - 40*b[2]*c[2] + 2*b[2]*d[1] +\
 		    29*b1c1*d[0] + 23*b[0]*c[3] -21*c[2]*d[0] +\
@@ -85,21 +85,21 @@ class Baydoun
 		}
 
 
-		auto sqrt205=sqrt2*0.5;
-		std::complex<number> M[2] = {0.5 - sqrt205, 0.5 + sqrt205};
-		std::complex<number> M2[2] = {-0.5 - sqrt205, -0.5 + sqrt205};
+		auto sqrt205=sqrt2*0.5L;
+		std::complex<number> M[2] = {0.5L - sqrt205, 0.5L + sqrt205};
+		std::complex<number> M2[2] = {-0.5L - sqrt205, -0.5L + sqrt205};
 
 		auto arg1_1 = A1*bl1;
 		auto arg1_2 = -d0*R1;
 		auto arg2_1 = A2*bl2;
-		auto arg2_2 = pow(d0, 2)*R2;
+		auto arg2_2 = powl(d0, 2L)*R2;
 
 		// Вычисляем аргумент комплексного числа
 		auto phi1 = std::arg(arg1_1) - std::arg(arg1_2);
 		auto phi2 = std::arg(arg2_1) - std::arg(arg2_2);
 
-		auto a1 = (sqrt3ftwo)*(std::cos(phi1)+1i*std::sin(phi1));
-		auto a2 = (sqrt3ftwo)*(std::cos(phi2)+1i*std::sin(phi2));
+		auto a1 = (sqrt3ftwo)*(std::cos(phi1)+std::complex<number>(0, std::sin(phi1)));
+		auto a2 = (sqrt3ftwo)*(std::cos(phi2)+std::complex<number>(0, std::sin(phi2)));
 
 		auto a1R1 = a1*R1;
 		auto a2R2 = a2*R2;
