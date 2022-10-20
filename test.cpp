@@ -1,10 +1,12 @@
 #include "Methods.h"
 #include <vector>
+#include <iomanip>
 
 int main(){
-    auto Solver = Baydoun<long double>();
-    std::vector<std::complex<long double>> roots;
-    int roots_num = Solver(2.0L, 3.5L, 4.0L, 5.0L, roots);
+    std::setprecision(30);
+    auto Solver = Baydoun<double>();
+    std::vector<std::complex<double>> roots;
+    int roots_num = Solver(2.0, 3.5, 4.0, 5.0, roots);
     for (auto &root : roots){
         std::cout << root << "\n";
     }
