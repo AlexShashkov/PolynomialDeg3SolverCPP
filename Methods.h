@@ -235,9 +235,9 @@ public:
 template <typename number>
 class Vieta
 {
-        number pi2div3 = 2*PI/3;
-        number sqrt3 = sqrt(3);
-        number onethree = 1/3;
+        number pi2div3;
+        number sqrt3;
+        number onethree;
 
 	int sign(number val) {
 	    return (number(0) < val) - (val < number(0));
@@ -316,7 +316,7 @@ public:
 	Vieta(){
 		pi2div3 = 2*PI/3;
 		sqrt3 = sqrt(3);
-		onethree = 1/3;
+		onethree = 1.0/3.0;
 	}
 
 	int operator()(number a, number b, number c, number d,
@@ -331,11 +331,14 @@ public:
 			a = 1;
 		}
 
-		number Q = pow(b, 2)*onethree*onethree - c*onethree;
+		auto Q = b*b*onethree*onethree - c*onethree;
+		// std::cout << "b " << b << " b^2 " << b*b << " c " << c << "\n";
+		// std::cout << "onethree " << onethree << "\n";
+		// std::cout << Q << ":)\n";
 		if(Q == 0){
 			number rs = -b/3;
 			roots = {rs, rs, rs};
-			return 1;
+			return 3;
 		}
 		else{
 			number R = pow(b, 3)*onethree*onethree*onethree-c*b/6+d*0.5;
