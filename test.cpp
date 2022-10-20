@@ -2,7 +2,27 @@
 #include <vector>
 #include <iomanip>
 
+#include <random>
+
+/*
+double* generateEpsilon(double from, double to, double epsilon, double shakefrom, double shaketo, std::mt19937 gen, std::vector<std::complex<double>> &roots){
+    double pivot = (fabs(from)+fabs(to))/4;
+    std::uniform_int_distribution<> distrib(from, pivot);
+    std::uniform_int_distribution<> shake(shakefrom, shaketo);
+
+    std::complex<double> x1(distrib(gen), distrib(gen));
+    std::complex<double> x2(distrib(gen) + shake(gen) + epsilon, distrib(gen) + shake(gen) + epsilon);
+    std::complex<double> x3(distrib(gen) + shake(gen) + 2*epsilon, distrib(gen) + shake(gen) + 2*epsilon);
+
+    roots = {x1, x2, x3};
+}
+*/
+
 int main(){
+    // Randomizer
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
     std::setprecision(30);
     auto SolverB = Baydoun<double>();
     auto SolverV = Vieta<double>();

@@ -196,7 +196,7 @@ class Baydoun
 			for (auto &r: roots) {
 				// Проверка на нулевые Im
 				// std::cout << std::numeric_limits<number>::epsilon() << "\n";
-				if(fabs(r.imag()) < std::abs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
+				if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
 			}
 			roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
 			return roots.size();
@@ -335,7 +335,7 @@ class Vieta
 		for (auto &r: roots) {
 			// Проверка на нулевые Im
 			// std::cout << std::numeric_limits<number>::epsilon() << "\n";
-			if(fabs(r.imag()) < std::abs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
+			if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
 		}
 		roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
 		return roots;
@@ -365,7 +365,7 @@ class Vieta
 		for (auto &r: roots) {
 			// Проверка на нулевые Im
 			// std::cout << std::numeric_limits<number>::epsilon() << "\n";
-			if(fabs(r.imag()) < std::abs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
+			if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
 		}
 		roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
 		return roots;
@@ -412,7 +412,7 @@ class Vieta
 		for (auto &r: roots) {
 			// Проверка на нулевые Im
 			// std::cout << std::numeric_limits<number>::epsilon() << "\n";
-			if(fabs(r.imag()) < std::abs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
+			if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
 		}
 		roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
 		return roots;
@@ -493,11 +493,13 @@ public:
 			std::vector<std::vector<std::complex<number>>> &roots){
 		// x^3, x^2, x, c
 		int *numbers = new int[count];
+
+		std::vector<std::complex<number>> res;
 		for(int i = 0; i < count; i++){
 			std::cout << i << "\n";
-			std::vector<std::complex<number>> res;
 			numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
 			roots.push_back(res);
+			res.clear();
 		}
 		return numbers;
 	}
@@ -516,10 +518,11 @@ public:
 			std::vector<std::vector<std::complex<number>>> &roots){
 		// x^3, x^2, x, c
 		int *numbers = new int[count];
+		std::vector<std::complex<number>> res;
 		for(int i = 0; i < count; i++){
-			std::vector<std::complex<number>> res;
 			numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
 			roots.push_back(res);
+			res.clear();
 		}
 		return numbers;
 	}
