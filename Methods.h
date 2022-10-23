@@ -6,6 +6,7 @@
 #include <complex>
 #include <iostream>
 #include <algorithm>
+#include <iomanip>
 
 using namespace std::complex_literals;
 
@@ -270,7 +271,7 @@ public:
 		// x^3, x^2, x, c
 		int *numbers = new int[count];
 		for(int i = 0; i < count; i++){
-			std::cout << i << "\n";
+			// std::cout << i << "\n";
 			std::vector<std::complex<number>> res;
 			numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
 			roots.push_back(res);
@@ -496,7 +497,7 @@ public:
 
 		std::vector<std::complex<number>> res;
 		for(int i = 0; i < count; i++){
-			std::cout << i << "\n";
+			// std::cout << i << "\n";
 			numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
 			roots.push_back(res);
 			res.clear();
