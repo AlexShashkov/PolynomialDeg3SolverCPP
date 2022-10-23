@@ -4,6 +4,22 @@
 #include <random>
 #include <cmath>
 
+/*Генерация корней
+@type from: double
+@param from: от
+@type to: double
+@param to: до
+@type epsilon: double
+@param epsilon: расстояние между корнями
+@type shakefrom: double
+@param shakefrom: смещение корня от
+@type shaketo: double
+@param shaketo: смещение корня до
+@type gen: mt19937
+@param gen: Генератор чисел
+@rtype: vector<complex<double>>
+@returns: Сгенерированные корни
+*/
 std::vector<std::complex<double>> generateEpsilon(double from, double to, double epsilon, double shakefrom, double shaketo, std::mt19937 gen){
     std::uniform_real_distribution<> distrib(from, to - epsilon);
     std::uniform_real_distribution<> shake(shakefrom, shaketo);
@@ -18,6 +34,14 @@ std::vector<std::complex<double>> generateEpsilon(double from, double to, double
     return std::vector<std::complex<double>>{x1, x2, x3};
 }
 
+/*Генерация коэффициента
+@type k: int
+@param root: Позиция коэффициента от 1 до 3 (x^2 до C)
+@type roots: vector<complex<TEMPLATE>>&
+@param root: Вектор, который хранит корни уравнения.
+@rtype: double
+@returns: Сгенерированный коэффициент
+*/
 double coeff(int k, std::vector<std::complex<double>>& roots)
 {
     int size = roots.size();
@@ -66,6 +90,22 @@ double coeff(int k, std::vector<std::complex<double>>& roots)
     return pow(-1.0,k)*sum.real();
 }
 
+/*Генерация коэффициентов и корней
+@type from: double
+@param from: от
+@type to: double
+@param to: до
+@type epsilon: double
+@param epsilon: расстояние между корнями
+@type shakefrom: double
+@param shakefrom: смещение корня от
+@type shaketo: double
+@param shaketo: смещение корня до
+@type roots: vector<complex<TEMPLATE>>&
+@param root: Вектор, который хранит корни уравнения.
+@rtype: double*
+@returns: Сгенерированные коэффициенты
+*/
 double* generatePolynomial(double from, double to, double epsilon, double shakefrom, double shaketo, std::vector<std::complex<double>>& roots){
     // Randomizer
     std::random_device rd;
