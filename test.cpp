@@ -1,5 +1,15 @@
 #include "Methods.h"
 #include "Generate.h"
+#include <fstream>
+
+const double ALLOWED = 1e-2;
+
+bool compareComplexVec(std::vector<std::complex<double>> a, std::vector<std::complex<double>> b){
+    for (int i = 0; i < a.size(); i++){
+        if (std::fabs(a[i] - b[i]) >= ALLOWED) return false;
+    }
+    return true;
+}
 
 int main(int argc,char* argv[]){
     std::setprecision(30);
@@ -127,7 +137,41 @@ int main(int argc,char* argv[]){
            std::cout << root << " ";
         }
     }
-    std::cout << "\n";
+    std::cout << "\nНачинаю запись полиномов и результатов в файл";
+
+    std::ofstream file;
+    file.open ("polynomials.txt");
+    file << count << " " << from << " " << to << " " << step << " " << epsilon_from << " " << epsilon_to << "\n";
+    for(int i = 0; i < count; i++){
+        for(int j = 0; j < 4; j++)
+          file << polynomials[i][j] << " ";
+        file << "; ";
+        for (auto &root : roots[i]){
+           file << root << " ";
+        }
+        file << "\n";
+    }
+    file.close();
+
+    file.open ("vietaresults.txt");
+    file << "Vieta results\n";
+    for(int i = 0; i < count; i++){
+        for (auto &root : rootsV[i]){
+           file << root << " ";
+        }
+        file << compareComplexVec(roots[i], rootsB[i]) << "\n";
+    }
+    file.close();
+
+    file.open ("baydounresults.txt");
+    file << "Baydoun results\n";
+    for(int i = 0; i < count; i++){
+        for (auto &root : rootsB[i]){
+           file << root << " ";
+        }
+        file << compareComplexVec(roots[i], rootsB[i]) << "\n";
+    }
+    file.close();
 
     for(int i = 0; i < count; ++i) {
         delete [] polynomials[i];
