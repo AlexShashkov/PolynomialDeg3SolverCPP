@@ -2,11 +2,9 @@
 #include "Generate.h"
 #include <fstream>
 
-const double ALLOWED = 1e-2;
-
-bool compareComplexVec(std::vector<std::complex<double>> a, std::vector<std::complex<double>> b){
+bool compareComplexVec(std::vector<std::complex<double>> a, std::vector<std::complex<double>> b, double allowed){
     for (int i = 0; i < a.size(); i++){
-        if (std::fabs(a[i] - b[i]) >= ALLOWED) return false;
+        if (std::fabs(a[i] - b[i]) >= allowed) return false;
     }
     return true;
 }
@@ -14,12 +12,12 @@ bool compareComplexVec(std::vector<std::complex<double>> a, std::vector<std::com
 int main(int argc,char* argv[]){
     std::setprecision(30);
     int count;
+    double allowed = 1e-2;
     double from = -1;
     double to = 1;
     double step = 0.1;
     double epsilon_from = 0.01;
     double epsilon_to = 0.01;
-
     if (argc == 1){
         std::cout << "Введите количество полиномов > ";
         std::cin >> count;
@@ -27,25 +25,28 @@ int main(int argc,char* argv[]){
     else if (argc == 2){
         count = std::atoi(argv[1]);
     }
-    else if (argc == 4){
+    else if (argc == 3){
         count = std::atoi(argv[1]);
-        from  = std::atof(argv[2]);
-        to    = std::atof(argv[3]);
+        allowed  = std::atof(argv[2]);
     }
-    else if (argc == 5){
+    else if (argc == 6){
         count = std::atoi(argv[1]);
+        allowed  = std::atof(argv[2]);
         from  = std::atof(argv[2]);
         to    = std::atof(argv[3]);
         step  = std::atof(argv[4]);
     }
-    else if (argc == 7){
+    else if (argc == 8){
         count        = std::atoi(argv[1]);
-        from         = std::atof(argv[2]);
-        to           = std::atof(argv[3]);
-        step         = std::atof(argv[4]);
-        epsilon_from = std::atof(argv[5]);
-        epsilon_to   = std::atof(argv[6]);
+        allowed      = std::atof(argv[2]);
+        from         = std::atof(argv[3]);
+        to           = std::atof(argv[4]);
+        step         = std::atof(argv[5]);
+        epsilon_from = std::atof(argv[6]);
+        epsilon_to   = std::atof(argv[7]);
     }
+    std::cout << "Launching " << count << " " << allowed << " " << from << " " << to << " " 
+        << step << " " << epsilon_from << " " << epsilon_to << "\n";
     std::cout << "Генерирую полиномы.\n";
     
     double** polynomials = new double*[count];
@@ -71,22 +72,6 @@ int main(int argc,char* argv[]){
         );
     }
 
-    std::cout << "Сгенерированные корни.\n";
-    for(int i = 0; i < count; i++){
-        for (auto &root : roots[i]){
-           std::cout << root << " ";
-        }
-        std::cout << "\n";
-    }
-
-    std::cout << "Сгенерированные полиномы.\n";
-    std::cout << "X^3, x^2, x, C\n";
-    for(int i = 0; i < count; i++){
-        for(int j = 0; j < 4; j++)
-          std::cout << polynomials[i][j] << " ";
-        std::cout << "\n";
-    }
-
     auto SolverB = Baydoun<double>();
     auto SolverV = Vieta<double>();
 
@@ -110,34 +95,7 @@ int main(int argc,char* argv[]){
         );
     }
 
-    std::cout << "Результаты Baydoun:\n";
-    for(int i = 0; i < count; i++){
-        std::cout << "Найдено " << countRB[i] << " корня.\n";
-        std::cout << polynomials[i][0] << "x^3 + " << polynomials[i][1] << "x^2 + " << polynomials[i][2] << "x + " << polynomials[i][3] << "\n";
-        std::cout << "Ответ: ";
-        for (auto &root : rootsB[i]){
-           std::cout << root << " ";
-        }
-        std::cout << "\nОжидалось: ";
-        for (auto &root : roots[i]){
-           std::cout << root << " ";
-        }
-    }
-
-    std::cout << "\n\nРезультаты Виета:\n";
-    for(int i = 0; i < count; i++){
-        std::cout << "Найдено " << countRV[i] << " корня.\n";
-        std::cout << polynomials[i][0] << "x^3 + " << polynomials[i][1] << "x^2 + " << polynomials[i][2] << "x + " << polynomials[i][3] << "\n";
-        std::cout << "Ответ: ";
-        for (auto &root : rootsV[i]){
-           std::cout << root << " ";
-        }
-        std::cout << "\nОжидалось: ";
-        for (auto &root : roots[i]){
-           std::cout << root << " ";
-        }
-    }
-    std::cout << "\nНачинаю запись полиномов и результатов в файл";
+    std::cout << "\nНачинаю запись полиномов и результатов в файл\n";
 
     std::ofstream file;
     file.open ("polynomials.txt");
@@ -159,7 +117,7 @@ int main(int argc,char* argv[]){
         for (auto &root : rootsV[i]){
            file << root << " ";
         }
-        file << compareComplexVec(roots[i], rootsV[i]) << "\n";
+        file << compareComplexVec(roots[i], rootsV[i], allowed) << "\n";
     }
     file.close();
 
@@ -169,10 +127,10 @@ int main(int argc,char* argv[]){
         for (auto &root : rootsB[i]){
            file << root << " ";
         }
-        file << compareComplexVec(roots[i], rootsB[i]) << "\n";
+        file << compareComplexVec(roots[i], rootsB[i], allowed) << "\n";
     }
     file.close();
-
+    std::cout << "Результаты сохранены.\n";
     for(int i = 0; i < count; ++i) {
         delete [] polynomials[i];
     }
