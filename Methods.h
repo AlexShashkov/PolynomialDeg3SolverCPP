@@ -10,6 +10,9 @@
 
 using namespace std::complex_literals;
 
+// 16976403601 + i ( 56580909840 )
+
+
 /*
 Имплементация 'Analytical formula for the roots of the general complex cubic polynomial'
 Автор: Ibrahim Baydoun
@@ -27,40 +30,15 @@ class Baydoun
 
 	number bthree;
 
-	/*
-	number sqrt(number x)  
-	{
-		// РАБОТАЕТ ТОЛЬКО С FLOAT
-		// Babylonian Method + some manipulations on IEEE 32 bit floating point representation
-		// https://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Babylonian_method
-		std::cout << "amongus\n";
-		union
-		{
-			int i;
-			number x;
-		} u;
 
-		u.x = x;
-		u.i = (1<<29) + (u.i >> 1) - (1<<22); 
-
-		// Two Babylonian Steps (simplified from:)
-		// u.x = 0.5f * (u.x + x/u.x);
-		// u.x = 0.5f * (u.x + x/u.x);
-		u.x = u.x + x/u.x;
-		u.x = 0.25*u.x + x/u.x;
-
-		return u.x;
-	}  
-	*/
-
-        /*Вычисление вспомогательных степеней коэффициентов полинома.
-        @type b: TEMPLATE*
-        @param b: Массив, в котором будут храниться коэффициенты x^2.
-        @type c: TEMPLATE*
-        @param c: Массив, в котором будут храниться коэффициенты x.
-        @type d: TEMPLATE*
-        @param d: Массив, в котором будут храниться коэффициенты C.
-        */
+    /*Вычисление вспомогательных степеней коэффициентов полинома.
+    @type b: TEMPLATE*
+    @param b: Массив, в котором будут храниться коэффициенты x^2.
+    @type c: TEMPLATE*
+    @param c: Массив, в котором будут храниться коэффициенты x.
+    @type d: TEMPLATE*
+    @param d: Массив, в котором будут храниться коэффициенты C.
+    */
 	void prepare(number *b, number *c, number *d){
 		for (int i = 1; i < 6; i++){
 		    b[i] = b[i-1]*b[0];
@@ -73,16 +51,16 @@ class Baydoun
 		}
 	}
 
-        /*Второй шаг из статьи для вычисления корней
-        @type b: TEMPLATE*
-        @param b: Массив, в котором хранятся коэффициенты x^2.
-        @type c: TEMPLATE*
-        @param c: Массив, в котором хранятся коэффициенты x.
-        @type d: TEMPLATE*
-        @param d: Массив, в котором хранятся коэффициенты C.
-        @rtype: vector<complex<TEMPLATE>>
-        @returns: Корни уравнения.
-        */
+    /*Второй шаг из статьи для вычисления корней
+    @type b: TEMPLATE*
+    @param b: Массив, в котором хранятся коэффициенты x^2.
+    @type c: TEMPLATE*
+    @param c: Массив, в котором хранятся коэффициенты x.
+    @type d: TEMPLATE*
+    @param d: Массив, в котором хранятся коэффициенты C.
+    @rtype: vector<complex<TEMPLATE>>
+    @returns: Корни уравнения.
+    */
 	std::vector<std::complex<number>> part2(number *b, number *c, number *d,
 			number o, number r){
 		number c0d0 = c[0]*d[0];
@@ -121,6 +99,8 @@ class Baydoun
 		auto bl = (d[0]-b0c0) * sqrt1 * (b1c1 - 4*b[0]*c0d0 + 2*c[2] + d[1]) +sqrt2div9*t;
 		auto bl1 = pow(bl, onethree);
 		auto bl2 = pow(bl1, 2.0);
+        // std::cout << "bl1 " << bl1 << "\n";
+        // std::cout << "bl2 " << bl2 << "\n";
 		auto A1 = (-sqrt2div3)*(8*b[2]*c[0] - 4*d[0]*b[1] - 26*b0c1 + 30*c0d0) + 2*c[0]*sqrt1;
 		auto A2 = 8*(b[4]*c[1] - b[3]*c0d0) - 40*b[2]*c[2] + 2*b[2]*d[1] +\
 		    29*b1c1*d[0] + 23*b[0]*c[3] -21*c[2]*d[0] +\
@@ -140,6 +120,8 @@ class Baydoun
 		    R1 = pow(Rbase + r, onethree);
 		    R2 = pow(Rbase - r, onethree);
 		}
+        // std::cout << "R1 " << R1 << "\n";
+        // std::cout << "R2 " << R2 << "\n";
 
 		// std::cout << "_P2 R1 " << R1 << "\n";
 		// std::cout << "_P2 R2 " << R2 << "\n";
@@ -151,7 +133,7 @@ class Baydoun
 		auto arg1_1 = A1*bl1;
 		auto arg1_2 = -d0*R1;
 		auto arg2_1 = A2*bl2;
-		auto arg2_2 = static_cast<number>(pow(d0, 2.0f))*R2;
+		auto arg2_2 = static_cast<number>(pow(d0, 2.0))*R2;
 
 		// Вычисляем аргумент комплексного числа
 		auto phi1 = std::arg(arg1_1) - std::arg(arg1_2);
@@ -463,6 +445,8 @@ public:
 		}
 		else{
 			number R = pow(b, 3)*onethree*onethree*onethree-c*b/6+d*0.5;
+            // std::cout << "R " << R << "\n";
+
 			auto R2 = R*R;
 			auto Q3 = Q*Q*Q;
 			auto S = Q3-R2;

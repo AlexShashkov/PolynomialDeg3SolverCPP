@@ -57,10 +57,10 @@ int main(int argc,char* argv[]){
     }
 
     // Сортировка корней
-    auto csort = [](std::complex<double> a, std::complex<double> b) {
-        if (real(a) == real(b))
-            return imag(a) < imag(b);
-        return real(a) < real(b);
+    auto csort = [](std::complex<double> a, std::complex<double> b){
+        if (imag(a) == imag(b))
+            return real(a) < real(b);
+        return imag(a) < imag(b);
     };
 
     for(int i = 0; i < count; i++){
@@ -159,7 +159,7 @@ int main(int argc,char* argv[]){
         for (auto &root : rootsV[i]){
            file << root << " ";
         }
-        file << compareComplexVec(roots[i], rootsB[i]) << "\n";
+        file << compareComplexVec(roots[i], rootsV[i]) << "\n";
     }
     file.close();
 
