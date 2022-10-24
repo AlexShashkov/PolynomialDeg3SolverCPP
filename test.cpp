@@ -46,6 +46,29 @@ int main(int argc,char* argv[]){
         roots.push_back(gen);
     }
 
+    // Сортировка корней
+    auto csort = [](std::complex<double> a, std::complex<double> b) {
+        if (real(a) == real(b))
+            return imag(a) < imag(b);
+        return real(a) < real(b);
+    };
+
+    for(int i = 0; i < count; i++){
+        sort(
+            roots[i].begin(),
+            roots[i].end(),
+            csort
+        );
+    }
+
+    std::cout << "Сгенерированные корни.\n";
+    for(int i = 0; i < count; i++){
+        for (auto &root : roots[i]){
+           std::cout << root << " ";
+        }
+        std::cout << "\n";
+    }
+
     std::cout << "Сгенерированные полиномы.\n";
     std::cout << "X^3, x^2, x, C\n";
     for(int i = 0; i < count; i++){
@@ -63,6 +86,19 @@ int main(int argc,char* argv[]){
     auto countRB = SolverB(polynomials, count, rootsB);
     std::cout << "Решаю с помощью Виета.\n";
     auto countRV = SolverV(polynomials, count, rootsV);
+
+    for(int i = 0; i < count; i++){
+        sort(
+            rootsB[i].begin(),
+            rootsB[i].end(),
+            csort
+        );
+        sort(
+            rootsV[i].begin(),
+            rootsV[i].end(),
+            csort
+        );
+    }
 
     std::cout << "Результаты Baydoun:\n";
     for(int i = 0; i < count; i++){
@@ -92,6 +128,7 @@ int main(int argc,char* argv[]){
         }
     }
     std::cout << "\n";
+
     for(int i = 0; i < count; ++i) {
         delete [] polynomials[i];
     }
