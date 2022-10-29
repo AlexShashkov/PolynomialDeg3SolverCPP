@@ -15,10 +15,10 @@ int main(){
     }
     std::cout << "\n";
 
-    auto SolverB = Baydoun<double>();
+    Baydoun<double> SolverB;
     auto SolverV = Vieta<double>();
     std::vector<std::complex<double>> roots;
-    int roots_num = SolverB(2.0, 3.5, 4.0, 5.0, roots);
+    int roots_num = SolverB(1.0, -1.81214, 0.502814, 0.281353, roots);
     std::cout << "Baydoun. Найдено " << roots_num << " корня.\n";
     for (auto &root : roots){
         std::cout << root << "\n";

@@ -118,3 +118,4 @@ double* generatePolynomial(double from, double to, double epsilon, double shakef
     }
     return coeffs;
 }
+
