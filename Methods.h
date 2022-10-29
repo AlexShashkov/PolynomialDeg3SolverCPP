@@ -342,7 +342,7 @@ class Vieta
         number sqrt3 = static_cast<number>(_sqrt3);
 		std::vector<std::complex<number>> roots;
 		std::complex<number> x1, x2, x3 = 0;
-		auto inp2three = b*onethree;
+		number inp2three = b*onethree;
 		number _phi= 0;
 		std::complex<number> T;
 		number absQ3 = fabs(Q3);
@@ -396,8 +396,8 @@ public:
         */
 	int operator()(number a, number b, number c, number d,
 			std::vector<std::complex<number>> &roots){
-        // x^3, x^2, x, c
-        number onethree = static_cast<number>(_onethree);
+		// x^3, x^2, x, c
+		number onethree = static_cast<number>(_onethree);
 		if(a != 0){
 			number _a = 1/a;
 			b *= _a;
