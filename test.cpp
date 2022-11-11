@@ -98,7 +98,7 @@ int main(int argc,char* argv[]){
     std::cout << "\nНачинаю запись полиномов и результатов в файл\n";
 
     std::ofstream file;
-    file.open ("polynomials.txt");
+    file.open ("polynomials.txt", std::ofstream::trunc);
     file << count << " " << from << " " << to << " " << step << " " << epsilon_from << " " << epsilon_to << "\n";
     for(int i = 0; i < count; i++){
         for(int j = 0; j < 4; j++)
@@ -111,7 +111,7 @@ int main(int argc,char* argv[]){
     }
     file.close();
 
-    file.open ("vietaresults.txt");
+    file.open ("vietaresults.txt", std::ofstream::trunc);
     file << "Vieta results\n";
     for(int i = 0; i < count; i++){
         for (auto &root : rootsV[i]){
@@ -121,7 +121,7 @@ int main(int argc,char* argv[]){
     }
     file.close();
 
-    file.open ("baydounresults.txt");
+    file.open ("baydounresults.txt", std::ofstream::trunc);
     file << "Baydoun results\n";
     for(int i = 0; i < count; i++){
         for (auto &root : rootsB[i]){
