@@ -4,7 +4,7 @@
 int main(){
     std::setprecision(30);
     std::vector<std::complex<double>> gen_roots;
-    auto polynomial = generatePolynomial(-1, 1, 0.0001, -0.00001, 0.00001, gen_roots);
+    auto polynomial = generatePolynomial<double>(-1, 1, 0.0001, -0.00001, 0.00001, gen_roots);
     std::cout << "Сгенерированные корни:\n";
     for (auto &root : gen_roots){
        std::cout << root << "\n";
@@ -18,17 +18,16 @@ int main(){
     Baydoun<double> SolverB;
     auto SolverV = Vieta<double>();
     std::vector<std::complex<double>> roots;
-    int roots_num = SolverB(1.0, -1.81214, 0.502814, 0.281353, roots);
+    int roots_num = SolverB(polynomial[0],polynomial[1],polynomial[2],polynomial[3], roots);
     std::cout << "Baydoun. Найдено " << roots_num << " корня.\n";
     for (auto &root : roots){
         std::cout << root << "\n";
     }
-    roots_num = SolverV(2.0, 3.5, 4.0, 5.0, roots);
+    roots_num = SolverV(polynomial[0],polynomial[1],polynomial[2],polynomial[3], roots);
     std::cout << "Vieta. Найдено " << roots_num << " корня.\n";
     for (auto &root : roots){
         std::cout << root << "\n";
     }
-
     double arr[][4] = {
         {12.0, 34.2, 56.99, 7.2},
         {1.0001, 2.03, 3.02, 4.01},
@@ -53,7 +52,7 @@ int main(){
            std::cout << root << "\n";
         }
     }
-    delete[] mul_num;
+    //delete[] mul_num;
     delete[] polynomial;
     return 0;
 }

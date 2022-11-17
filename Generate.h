@@ -5,33 +5,34 @@
 #include <cmath>
 
 /*Генерация корней
-@type from: double
+@type from: number
 @param from: от
-@type to: double
+@type to: number
 @param to: до
-@type epsilon: double
+@type epsilon: number
 @param epsilon: расстояние между корнями
-@type shakefrom: double
+@type shakefrom: number
 @param shakefrom: смещение корня от
-@type shaketo: double
+@type shaketo: number
 @param shaketo: смещение корня до
 @type gen: mt19937
 @param gen: Генератор чисел
-@rtype: vector<complex<double>>
+@rtype: vector<complex<number>>
 @returns: Сгенерированные корни
 */
-std::vector<std::complex<double>> generateEpsilon(double from, double to, double epsilon, double shakefrom, double shaketo, std::mt19937 gen){
+template<typename number>
+std::vector<std::complex<number>> generateEpsilon(number from, number to, number epsilon, number shakefrom, number shaketo, std::mt19937 gen){
     std::uniform_real_distribution<> distrib(from, to - epsilon);
     std::uniform_real_distribution<> shake(shakefrom, shaketo);
 
     auto init = distrib(gen);
-    std::complex<double> x1(init, 0);
+    std::complex<number> x1(init, 0);
     auto a = init + shake(gen) + epsilon;
     auto b = init + shake(gen) + epsilon;
-    std::complex<double> x2(a, b);
-    std::complex<double> x3(a, -b);
+    std::complex<number> x2(a, b);
+    std::complex<number> x3(a, -b);
 
-    return std::vector<std::complex<double>>{x1, x2, x3};
+    return std::vector<std::complex<number>>{x1, x2, x3};
 }
 
 /*Генерация коэффициента
@@ -39,10 +40,11 @@ std::vector<std::complex<double>> generateEpsilon(double from, double to, double
 @param root: Позиция коэффициента от 1 до 3 (x^2 до C)
 @type roots: vector<complex<TEMPLATE>>&
 @param root: Вектор, который хранит корни уравнения.
-@rtype: double
+@rtype: number
 @returns: Сгенерированный коэффициент
 */
-double coeff(int k, std::vector<std::complex<double>>& roots)
+template<typename number>
+number coeff(int k, std::vector<std::complex<number>>& roots)
 {
     int size = roots.size();
     std::vector<int> loop_counter(k+1); // nested loops
@@ -57,7 +59,7 @@ double coeff(int k, std::vector<std::complex<double>>& roots)
 
     max[k] = (int)INFINITY;
     int p1 = 0;
-    std::complex<double> sum = 0;
+    std::complex<number> sum = 0;
 
     int counter;
     while(loop_counter[k]==0)
@@ -72,7 +74,7 @@ double coeff(int k, std::vector<std::complex<double>>& roots)
 
         if(counter == k - 1) // true if i_1 < i_2 < i_3 ....
         {
-            std::complex<double> prod(1);
+            std::complex<number> prod(1);
             for(int i = 0 ; i < k ; ++i)
             prod *= roots[loop_counter[i]];   // taking products
 
@@ -91,27 +93,28 @@ double coeff(int k, std::vector<std::complex<double>>& roots)
 }
 
 /*Генерация коэффициентов и корней
-@type from: double
+@type from: number
 @param from: от
-@type to: double
+@type to: number
 @param to: до
-@type epsilon: double
+@type epsilon: number
 @param epsilon: расстояние между корнями
-@type shakefrom: double
+@type shakefrom: number
 @param shakefrom: смещение корня от
-@type shaketo: double
+@type shaketo: number
 @param shaketo: смещение корня до
 @type roots: vector<complex<TEMPLATE>>&
 @param root: Вектор, который хранит корни уравнения.
-@rtype: double*
+@rtype: number*
 @returns: Сгенерированные коэффициенты
 */
-double* generatePolynomial(double from, double to, double epsilon, double shakefrom, double shaketo, std::vector<std::complex<double>>& roots){
+template<typename number>
+number* generatePolynomial(number from, number to, number epsilon, number shakefrom, number shaketo, std::vector<std::complex<number>>& roots){
     // Randomizer
     std::random_device rd;
     std::mt19937 gen(rd());
     roots = generateEpsilon(from, to, epsilon, shakefrom, shaketo, gen);
-    double *coeffs = new double[4];
+    number *coeffs = new number[4];
     coeffs[0] = 1;
     for(int i = 1; i<4; i++){
         coeffs[i] = coeff(i, roots);

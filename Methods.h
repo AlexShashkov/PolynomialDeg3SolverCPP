@@ -1,5 +1,5 @@
-#ifndef BAYDOUN_H
-#define BAYDOUN_H
+#ifndef METHODS_H
+#define METHODS_H
 #include <cmath>
 #include <vector>
 #include <complex>
@@ -20,7 +20,7 @@ class Baydoun
 	long double _onethree;
 	long double _one27;
 	long double _sqrt3;
-	long double _bthree;
+	long double _cbrt4ftwo;
 
 
 	/*Вычисление вспомогательных степеней коэффициентов полинома.
@@ -54,11 +54,11 @@ class Baydoun
 	@returns: Корни уравнения.
 	*/
 	std::vector<std::complex<number>> part2(number *b, number *c, number *d,
-			number o, number r){
+			number o, number r,number bthree){
 		number onethree = static_cast<number>(_onethree);
 		number sqrt3    = static_cast<number>(_sqrt3);
-		number bthree   = static_cast<number>(_bthree);
-			 
+		number cbrt4ftwo= static_cast<number>(_cbrt4ftwo);
+		
 		number c0d0 = c[0]*d[0];
 		number b0c0 = b[0]*c[0];
 		number b0c1 = b[0]*c[1];
@@ -68,17 +68,14 @@ class Baydoun
 		    c[1]*d[0]*(static_cast<number>(24)*b[2]+static_cast<number>(291)*d[0]) + d[2]*(static_cast<number>(144)*b0c0 - static_cast<number>(27)*d[0] - static_cast<number>(2)*b[2]);
 		number d0 = static_cast<number>(4)*(b[3]*c[1] - b[2]*c0d0) - static_cast<number>(12)*c[0]*d[1] - static_cast<number>(14)*b[1]*c[2] + \
 			static_cast<number>(28)*b0c1*d[0] + b[1]*d[1] + c[3];
-
 		std::complex<number> sqrt1;
 		if (o > 0)
 		    sqrt1 = sqrt(o);
 		else
 		    sqrt1 = std::complex<number>(0, 1)*static_cast<number>(sqrt(fabs(o)));
 		std::complex<number> sqrt2 = std::complex<number>(0, 1)*sqrt3;
-
 		auto sqrt2div3 = sqrt2*onethree;
 		auto sqrt2div9 = sqrt2div3*onethree;
-		auto sqrt3ftwo = sqrt3*static_cast<number>(0.5);
 
 		auto bl = (d[0]-b0c0) * sqrt1 * (b1c1 - static_cast<number>(4)*b[0]*c0d0 + static_cast<number>(2)*c[2] + d[1]) +sqrt2div9*t;
 		auto bl1 = pow(bl, onethree);
@@ -110,20 +107,16 @@ class Baydoun
 		auto arg1_2 = -d0*R1;
 		auto arg2_1 = A2*bl2;
 		auto arg2_2 = pow(d0, static_cast<number>(2.0))*R2;
-
 		// Вычисляем аргумент комплексного числа
 		auto phi1 = std::arg(arg1_1) - std::arg(arg1_2);
 		auto phi2 = std::arg(arg2_1) - std::arg(arg2_2);
-
-		auto a1 = (sqrt3ftwo)*(std::cos(phi1)+std::complex<number>(0, std::sin(phi1)));
-		auto a2 = (sqrt3ftwo)*(std::cos(phi2)+std::complex<number>(0, std::sin(phi2)));
-
+		auto a1 = (cbrt4ftwo)*(std::cos(phi1)+std::complex<number>(0, std::sin(phi1)));
+		auto a2 = (cbrt4ftwo)*(std::cos(phi2)+std::complex<number>(0, std::sin(phi2)));
 		auto a1R1 = a1*R1;
 		auto a2R2 = a2*R2;
 		auto x1 = -a1R1 + a2R2 - bthree;
 		auto x2 = M[0]*a1R1 + M2[0]*a2R2 - bthree;
 		auto x3 = M[1]*a1R1 + M2[1]*a2R2 - bthree;
-
 		return std::vector<std::complex<number>>{x1, x2, x3};
 	}
 
@@ -152,7 +145,7 @@ class Baydoun
 			return 3;
 		}
 		else{
-			roots = part2(b, c, d, o, r);
+			roots = part2(b, c, d, o, r,bthree);
 			for (auto &r: roots) {
 				// Проверка на нулевые Im
 				// std::cout << std::numeric_limits<number>::epsilon() << "\n";
@@ -168,6 +161,7 @@ public:
 		_onethree = 1.0L/3.0L;
 		_one27 = _onethree*_onethree*_onethree;
 		_sqrt3 = std::sqrt(3L);
+		_cbrt4ftwo = pow(4L,_onethree)*static_cast<number>(0.5);
 	}
 
 	/*Функтор для решения уравнения методом Baydoun.
@@ -206,6 +200,21 @@ public:
 		delete[] _c;
 		delete[] _d;
 		return result;
+	}
+
+	/*Функтор для решения уравнения методом Baydoun.
+	@type inp: vector<TEMPLATE>&
+	@param a: Коэффициенты.
+	@type roots: vector<complex<TEMPLATE>>&
+	@param root: Вектор, который хранит корни уравнения.
+	@rtype: int
+	@returns: Количество корней.
+	*/
+	int operator()(std::vector<number> &inp, std::vector<std::complex<number>> &roots, bool reverse=false){
+		if(reverse)
+        	return operator()(inp[3], inp[2], inp[1], inp[0], roots);
+		else
+			return operator()(inp[0], inp[1], inp[2], inp[3], roots);
 	}
 
 	/*Функтор для решения уравнений методом Baydoun.
@@ -267,7 +276,8 @@ class Vieta
         long double _onethree;
 
 	int sign(number val) {
-	    return (number(0) < val) - (val < number(0));
+		if( number(0) < val){ return -1; }
+		else{ return 1;}
 	}
 
 	/*Вырожденный случай.
@@ -284,6 +294,7 @@ class Vieta
 		auto _x = cbrt(R);
 		auto x1 = -static_cast<number>(2)*_x-inp2three;
 		auto x2 = _x-inp2three;
+		std::cout<<"2 действ";
 		roots = {x1, x2};
 		for (auto &r: roots) {
 			// Проверка на нулевые Im
@@ -308,13 +319,15 @@ class Vieta
 	*/
 	std::vector<std::complex<number>> usual(number Q, number Q3, number R, number b){
 		std::vector<std::complex<number>> roots;
+		number x1,x2,x3 = 0;
 		number pi2div3 = b*static_cast<number>(_pi2div3);
 		number inp2three = b*static_cast<number>(_onethree);
-		auto phi = acos(R/sqrt(Q3))*static_cast<number>(_onethree);
-		auto sqrtQ = static_cast<number>(2)*sqrt(Q);
-		auto x1 = -sqrtQ*cos(phi)-inp2three;
-		auto x2 = -sqrtQ*cos(phi+pi2div3)-inp2three;
-		auto x3 = -sqrtQ*cos(phi-pi2div3)-inp2three;
+		number phi = acos(R/sqrt(Q3))*static_cast<number>(_onethree);
+		number sqrtQ = static_cast<number>(2)*sqrt(Q);
+		x1 = -sqrtQ*cos(phi)-inp2three;
+		x2 = -sqrtQ*cos(phi+pi2div3)-inp2three;
+		x3 = -sqrtQ*cos(phi-pi2div3)-inp2three;
+		std::cout<<"3 действ";
 		roots = {x1, x2, x3};
 		for (auto &r: roots) {
 			// Проверка на нулевые Im
@@ -341,29 +354,30 @@ class Vieta
         number onethree = static_cast<number>(_onethree);
         number sqrt3 = static_cast<number>(_sqrt3);
 		std::vector<std::complex<number>> roots;
-		std::complex<number> x1, x2, x3 = 0;
+		number x1 = 0;
+		std::complex<number>  x2, x3 = 0;
 		number inp2three = b*onethree;
 		number _phi= 0;
-		std::complex<number> T;
+		number T;
+		number Tin;
+		number sqrtsh;
 		number absQ3 = fabs(Q3);
 		number sqrtabsQ = sqrt(fabs(Q));
 		if(Q > 0){
-			std::complex<number> phi = acosh(fabs(R)/sqrt(absQ3))*onethree;
-			auto T = sign(R)*sqrtabsQ*cosh(phi);
-			auto sqrtsh = sqrt3*sqrtabsQ*cosh(phi)*1i;
-			auto Tin = T - inp2three;
-			x2 = Tin + sqrtsh;
-			x3 = Tin - sqrtsh;
+			number phi = acosh(fabs(R)/sqrt(absQ3))*onethree;
+			T = sqrtabsQ*cosh(phi);
+			sqrtsh = sqrt3*sqrtabsQ*sinh(phi);
+			Tin = T - inp2three;
 		}
 		else{
-			std::complex<number> phi = asinh(fabs(R)/sqrt(absQ3))*onethree;
-			T = sign(R)*sqrtabsQ*sinh(phi);
-			auto sqrtsh = sqrt3*sqrtabsQ*cosh(phi)*1i;
-			auto Tin = T - inp2three;
-			x2 = Tin + sqrtsh;
-			x3 = Tin - sqrtsh;
+			number phi = asinh(fabs(R)/sqrt(absQ3))*onethree;
+			T = sqrtabsQ*sinh(phi);
+			sqrtsh = sqrt3*sqrtabsQ*cosh(phi);
+			Tin = T - inp2three;
 		}
-		x1 = -2.0*T-inp2three;
+		x1 = static_cast<number>(-2)*T-inp2three;
+		x2 = std::complex<number>(Tin,sqrtsh);
+		x3 = std::complex<number>(Tin,-sqrtsh);
 		roots = {x1, x2, x3};
 		for (auto &r: roots) {
 			// Проверка на нулевые Im
@@ -406,7 +420,7 @@ public:
 			a = 1;
 		}
 
-		auto Q = b*b*onethree*onethree - c*onethree;
+		auto Q = b*b*onethree*onethree -c*onethree;
 		// std::cout << "b " << b << " b^2 " << b*b << " c " << c << "\n";
 		// std::cout << "onethree " << onethree << "\n";
 		// std::cout << Q << ":)\n";
@@ -417,12 +431,10 @@ public:
 		}
 		else{
 			number R = pow(b, 3)*onethree*onethree*onethree-c*b/6+d*0.5;
-            // std::cout << "R " << R << "\n";
-
 			auto R2 = R*R;
 			auto Q3 = Q*Q*Q;
 			auto S = Q3-R2;
-
+			
 			if(S==0){
 				roots = degenerate(R, b);
 			}
@@ -434,6 +446,21 @@ public:
 			}
 			return roots.size();
 		}
+	}
+
+	/*Функтор для решения уравнения методом Виета.
+	@type inp: vector<TEMPLATE>&
+	@param a: Коэффициенты.
+	@type roots: vector<complex<TEMPLATE>>&
+	@param root: Вектор, который хранит корни уравнения.
+	@rtype: int
+	@returns: Количество корней.
+	*/
+	int operator()(std::vector<number> &inp, std::vector<std::complex<number>> &roots, bool reverse=false){
+		if(reverse)
+        	return operator()(inp[3], inp[2], inp[1], inp[0], roots);
+		else
+			return operator()(inp[0], inp[1], inp[2], inp[3], roots);
 	}
 
         /*Функтор для решения уравнений методом Виета.
@@ -481,6 +508,7 @@ public:
 			roots.push_back(res);
 			res.clear();
 		}
+		
 		return numbers;
 	}
 };
