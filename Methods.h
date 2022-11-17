@@ -32,14 +32,17 @@ class Baydoun
 	@param d: Массив, в котором будут храниться коэффициенты C.
 	*/
 	void prepare(number *b, number *c, number *d){
+		number b0 = b[0];
+		number c0 = c[0];
+		number d0 = d[0];
 		for (int i = 1; i < 6; i++){
-		    b[i] = b[i-1]*b[0];
+		    b[i] = b[i-1]*b0;
 		}
 		for (int i = 1; i < 4; i++){
-		    c[i] = c[i-1]*c[0];
+		    c[i] = c[i-1]*c0;
 		}
 		for (int i = 1; i < 3; i++){
-		    d[i] = d[i-1]*d[0];
+		    d[i] = d[i-1]*d0;
 		}
 	}
 
@@ -54,20 +57,35 @@ class Baydoun
 	@returns: Корни уравнения.
 	*/
 	std::vector<std::complex<number>> part2(number *b, number *c, number *d,
-			number o, number r,number bthree){
+			number o, number r, number bthree){
 		number onethree = static_cast<number>(_onethree);
 		number sqrt3    = static_cast<number>(_sqrt3);
 		number cbrt4ftwo= static_cast<number>(_cbrt4ftwo);
+
+		// Самые часто вызываемые переменные
+
+		number b0 = b[0];
+		number b1 = b[1];
+		number b2 = b[2];
+		number b3 = b[3];
+
+		number c0 = c[0];
+		number c1 = c[1];
+		number c2 = c[2];
+
+		number d0 = d[0];
+		number d1 = d[1];
 		
-		number c0d0 = c[0]*d[0];
-		number b0c0 = b[0]*c[0];
-		number b0c1 = b[0]*c[1];
-		number b1c1 = b[1]*c[1]*static_cast<number>(4);
-		number t = c[2]*(static_cast<number>(16)*b[5] + static_cast<number>(72)*d[1] + static_cast<number>(264)*b[2]*d[0] + static_cast<number>(66)*b[1]*c[1] - \
-		    static_cast<number>(132)*b[0]*c0d0 + static_cast<number>(2)*c[2]) + b[3]*c[0]*(static_cast<number>(12)*d[1] - static_cast<number>(84)*c[2]) - b[1] * \
-		    c[1]*d[0]*(static_cast<number>(24)*b[2]+static_cast<number>(291)*d[0]) + d[2]*(static_cast<number>(144)*b0c0 - static_cast<number>(27)*d[0] - static_cast<number>(2)*b[2]);
-		number d0 = static_cast<number>(4)*(b[3]*c[1] - b[2]*c0d0) - static_cast<number>(12)*c[0]*d[1] - static_cast<number>(14)*b[1]*c[2] + \
-			static_cast<number>(28)*b0c1*d[0] + b[1]*d[1] + c[3];
+		
+		number c0d0 = c0*d[0];
+		number b0c0 = b0*c0;
+		number b0c1 = b[0]*c1;
+		number b1c1 = b1*c1*static_cast<number>(4);
+		number t = c2*(static_cast<number>(16)*b[5] + static_cast<number>(72)*d1 + static_cast<number>(264)*b2*d0 + static_cast<number>(66)*b1*c1 - \
+		    static_cast<number>(132)*b0*c0d0 + static_cast<number>(2)*c2) + b3*c0*(static_cast<number>(12)*d1 - static_cast<number>(84)*c2) - b1 * \
+		    c1*d0*(static_cast<number>(24)*b2+static_cast<number>(291)*d0) + d[2]*(static_cast<number>(144)*b0c0 - static_cast<number>(27)*d0 - static_cast<number>(2)*b2);
+		number partiond0 = static_cast<number>(4)*(b3*c1 - b2*c0d0) - static_cast<number>(12)*c0*d1 - static_cast<number>(14)*b1*c2 + \
+			static_cast<number>(28)*b0c1*d0 + b1*d1 + c[3];
 		std::complex<number> sqrt1;
 		if (o > 0)
 		    sqrt1 = sqrt(o);
@@ -77,13 +95,13 @@ class Baydoun
 		auto sqrt2div3 = sqrt2*onethree;
 		auto sqrt2div9 = sqrt2div3*onethree;
 
-		auto bl = (d[0]-b0c0) * sqrt1 * (b1c1 - static_cast<number>(4)*b[0]*c0d0 + static_cast<number>(2)*c[2] + d[1]) +sqrt2div9*t;
+		auto bl = (d0-b0c0) * sqrt1 * (b1c1 - static_cast<number>(4)*b0*c0d0 + static_cast<number>(2)*c2 + d1) +sqrt2div9*t;
 		auto bl1 = pow(bl, onethree);
 		auto bl2 = pow(bl1, static_cast<number>(2.0));
-		auto A1 = (-sqrt2div3)*(static_cast<number>(8)*b[2]*c[0] - static_cast<number>(4)*d[0]*b[1] - static_cast<number>(26)*b0c1 + static_cast<number>(30)*c0d0) + static_cast<number>(2)*c[0]*sqrt1;
-		auto A2 = static_cast<number>(8)*(b[4]*c[1] - b[3]*c0d0) - static_cast<number>(40)*b[2]*c[2] + static_cast<number>(2)*b[2]*d[1] +\
-		    static_cast<number>(29)*b1c1*d[0] + static_cast<number>(23)*b[0]*c[3] - static_cast<number>(21)*c[2]*d[0] +\
-		    static_cast<number>(27)*d[2] - static_cast<number>(99)*b0c0*d[1] -sqrt1*sqrt2 * (static_cast<number>(2)*b1c1 - static_cast<number>(10)*b[0]*c0d0 + c[2] + static_cast<number>(3)*d[1]);
+		auto A1 = (-sqrt2div3)*(static_cast<number>(8)*b2*c0 - static_cast<number>(4)*d0*b1 - static_cast<number>(26)*b0c1 + static_cast<number>(30)*c0d0) + static_cast<number>(2)*c0*sqrt1;
+		auto A2 = static_cast<number>(8)*(b[4]*c1 - b3*c0d0) - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
+		    static_cast<number>(29)*b1c1*d0 + static_cast<number>(23)*b0*c[3] - static_cast<number>(21)*c2*d0 +\
+		    static_cast<number>(27)*d[2] - static_cast<number>(99)*b0c0*d1 -sqrt1*sqrt2 * (static_cast<number>(2)*b1c1 - static_cast<number>(10)*b0*c0d0 + c2 + static_cast<number>(3)*d1);
 		auto Rbase = sqrt1 * sqrt2div9;
 		std::complex<number> R1, R2;
 		if (o == 0)
@@ -104,9 +122,9 @@ class Baydoun
 		std::complex<number> M2[2] = {static_cast<number>(-0.5) - sqrt205, static_cast<number>(-0.5) + sqrt205};
 
 		auto arg1_1 = A1*bl1;
-		auto arg1_2 = -d0*R1;
+		auto arg1_2 = -partiond0*R1;
 		auto arg2_1 = A2*bl2;
-		auto arg2_2 = pow(d0, static_cast<number>(2.0))*R2;
+		auto arg2_2 = pow(partiond0, static_cast<number>(2.0))*R2;
 		// Вычисляем аргумент комплексного числа
 		auto phi1 = std::arg(arg1_1) - std::arg(arg1_2);
 		auto phi2 = std::arg(arg2_1) - std::arg(arg2_2);
@@ -133,10 +151,13 @@ class Baydoun
 	@returns: Количество корней.
 	*/
 	int solve(number *b, number *c, number *d, std::vector<std::complex<number>> &roots){
+		number d0 = d[0];
+		number b0 = b[0];
+
         number one27 = static_cast<number>(_one27);
-		number bthree = b[0]*static_cast<number>(_onethree);
-		number o = -static_cast<number>(4)*(b[2]*d[0] + c[2]) + b[1]*c[1] + static_cast<number>(18)*b[0]*c[0]*d[0] - static_cast<number>(27)*d[1];
-		number r = static_cast<number>(2)*b[2]*one27 -static_cast<number>(9)*b[0]*c[0]*one27 + d[0];
+		number bthree = b0*static_cast<number>(_onethree);
+		number o = -static_cast<number>(4)*(b[2]*d0 + c[2]) + b[1]*c[1] + static_cast<number>(18)*b0*c[0]*d0 - static_cast<number>(27)*d[1];
+		number r = static_cast<number>(2)*b[2]*one27 -static_cast<number>(9)*b0*c[0]*one27 + d0;
 
 		// std::cout << "_SOLVE o r, one27" << o << " " << r << " " << one27 << "\n";
 
@@ -146,12 +167,12 @@ class Baydoun
 		}
 		else{
 			roots = part2(b, c, d, o, r,bthree);
-			for (auto &r: roots) {
+			// for (auto &r: roots) {
 				// Проверка на нулевые Im
 				// std::cout << std::numeric_limits<number>::epsilon() << "\n";
-				if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
-			}
-			roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
+				// if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
+			// }
+			// roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
 			return roots.size();
 		};
 	}
@@ -181,13 +202,15 @@ public:
 	int operator()(number a, number b, number c, number d,
 			std::vector<std::complex<number>> &roots){
         // x^3, x^2, x, c
-		if(a != 0){
+		if(a != 0 && std::isfinite(a)){
 		    number _a = 1/a;
 		    b *= _a;
 		    c *= _a;
 		    d *= _a;
 		    a = 1;
 		}
+		else
+			throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
 
 		number *_b = new number[6];
 		number *_c = new number[4];
@@ -271,9 +294,9 @@ http://poivs.tsput.ru/ru/Math/Functions/Polynomials/VietaTrigonometricFormula
 template <typename number>
 class Vieta
 {
-        long double _pi2div3;
-        long double _sqrt3;
-        long double _onethree;
+	long double _pi2div3;
+	long double _sqrt3;
+	long double _onethree;
 
 	int sign(number val) {
 		if( number(0) < val){ return -1; }
@@ -323,10 +346,10 @@ class Vieta
 		number pi2div3 = b*static_cast<number>(_pi2div3);
 		number inp2three = b*static_cast<number>(_onethree);
 		number phi = acos(R/sqrt(Q3))*static_cast<number>(_onethree);
-		number sqrtQ = static_cast<number>(2)*sqrt(Q);
-		x1 = -sqrtQ*cos(phi)-inp2three;
-		x2 = -sqrtQ*cos(phi+pi2div3)-inp2three;
-		x3 = -sqrtQ*cos(phi-pi2div3)-inp2three;
+		number sqrtQ = static_cast<number>(-2)*sqrt(Q);
+		x1 = sqrtQ*cos(phi)-inp2three;
+		x2 = sqrtQ*cos(phi+pi2div3)-inp2three;
+		x3 = sqrtQ*cos(phi-pi2div3)-inp2three;
 		std::cout<<"3 действ";
 		roots = {x1, x2, x3};
 		for (auto &r: roots) {
@@ -367,14 +390,13 @@ class Vieta
 			number phi = acosh(fabs(R)/sqrt(absQ3))*onethree;
 			T = sqrtabsQ*cosh(phi);
 			sqrtsh = sqrt3*sqrtabsQ*sinh(phi);
-			Tin = T - inp2three;
 		}
 		else{
 			number phi = asinh(fabs(R)/sqrt(absQ3))*onethree;
 			T = sqrtabsQ*sinh(phi);
 			sqrtsh = sqrt3*sqrtabsQ*cosh(phi);
-			Tin = T - inp2three;
 		}
+		Tin = T - inp2three;
 		x1 = static_cast<number>(-2)*T-inp2three;
 		x2 = std::complex<number>(Tin,sqrtsh);
 		x3 = std::complex<number>(Tin,-sqrtsh);
@@ -389,7 +411,7 @@ class Vieta
 	}
 public:
 	Vieta(){
-		_pi2div3 = 2L*M_PI/3L;
+		_pi2div3 = 2L*static_cast<number>(M_PI)/3L;
 		_sqrt3 = sqrt(3L);
 		_onethree = 1.0L/3.0L;
 	}
@@ -412,13 +434,15 @@ public:
 			std::vector<std::complex<number>> &roots){
 		// x^3, x^2, x, c
 		number onethree = static_cast<number>(_onethree);
-		if(a != 0){
-			number _a = 1/a;
-			b *= _a;
-			c *= _a;
-			d *= _a;
-			a = 1;
+		if(a != 0 && std::isfinite(a)){
+		    number _a = 1/a;
+		    b *= _a;
+		    c *= _a;
+		    d *= _a;
+		    a = 1;
 		}
+		else
+			throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
 
 		auto Q = b*b*onethree*onethree -c*onethree;
 		// std::cout << "b " << b << " b^2 " << b*b << " c " << c << "\n";
