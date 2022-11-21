@@ -77,9 +77,9 @@ class Baydoun
 		number d1 = d[1];
 		
 		
-		number c0d0 = c0*d[0];
+		number c0d0 = c0*d0;
 		number b0c0 = b0*c0;
-		number b0c1 = b[0]*c1;
+		number b0c1 = b0*c1;
 		number b1c1 = b1*c1*static_cast<number>(4);
 		number t = c2*(static_cast<number>(16)*b[5] + static_cast<number>(72)*d1 + static_cast<number>(264)*b2*d0 + static_cast<number>(66)*b1*c1 - \
 		    static_cast<number>(132)*b0*c0d0 + static_cast<number>(2)*c2) + b3*c0*(static_cast<number>(12)*d1 - static_cast<number>(84)*c2) - b1 * \
@@ -99,9 +99,15 @@ class Baydoun
 		auto bl1 = pow(bl, onethree);
 		auto bl2 = pow(bl1, static_cast<number>(2.0));
 		auto A1 = (-sqrt2div3)*(static_cast<number>(8)*b2*c0 - static_cast<number>(4)*d0*b1 - static_cast<number>(26)*b0c1 + static_cast<number>(30)*c0d0) + static_cast<number>(2)*c0*sqrt1;
+		/*
 		auto A2 = static_cast<number>(8)*(b[4]*c1 - b3*c0d0) - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
 		    static_cast<number>(29)*b1c1*d0 + static_cast<number>(23)*b0*c[3] - static_cast<number>(21)*c2*d0 +\
 		    static_cast<number>(27)*d[2] - static_cast<number>(99)*b0c0*d1 -sqrt1*sqrt2 * (static_cast<number>(2)*b1c1 - static_cast<number>(10)*b0*c0d0 + c2 + static_cast<number>(3)*d1);
+		*/
+
+		auto A2 = static_cast<number>(8)*(b[4]*c1 - b3*c0d0) - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
+		    static_cast<number>(116)*b1c1*d0 + static_cast<number>(23)*b0*c[3] - static_cast<number>(99)*b0c0*d1 - static_cast<number>(21)*c2*d0 +\
+		    static_cast<number>(27)*d[2] -sqrt1*sqrt2 * (static_cast<number>(8)*b1c1 - static_cast<number>(10)*b0*c0d0 + c2 + static_cast<number>(3)*d1);
 		auto Rbase = sqrt1 * sqrt2div9;
 		std::complex<number> R1, R2;
 		if (o == 0)
