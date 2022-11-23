@@ -341,7 +341,7 @@ class Vieta
 			// std::cout << std::numeric_limits<number>::epsilon() << "\n";
 			if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
 		}
-		roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
+		// roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
 		return roots;
 	}
 
@@ -374,7 +374,7 @@ class Vieta
 			// std::cout << std::numeric_limits<number>::epsilon() << "\n";
 			if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
 		}
-		roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
+		// roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
 		return roots;
 	}
 
@@ -466,12 +466,12 @@ public:
 		// std::cout << "onethree " << onethree << "\n";
 		// std::cout << Q << ":)\n";
 		if(Q == 0){
-			number rs = -b/3;
+			number rs = -b/static_cast<number>(3);
 			roots = {rs, rs, rs};
 			return 3;
 		}
 		else{
-			number R = pow(b, 3)*onethree*onethree*onethree-c*b/6+d*0.5;
+			number R = pow(b, 3)*onethree*onethree*onethree-c*b/static_cast<number>(6)+d*static_cast<number>(0.5);
 			auto R2 = R*R;
 			auto Q3 = Q*Q*Q;
 			auto S = Q3-R2;
