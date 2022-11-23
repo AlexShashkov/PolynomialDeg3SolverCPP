@@ -22,6 +22,17 @@ class Baydoun
 	long double _sqrt3;
 	long double _cbrt4ftwo;
 
+	number arg(std::complex<number> inp){
+		number _pi = 0;
+		number x = std::real(inp);
+		number y = std::imag(inp);
+		if(x == 0)
+			return y > 0 ? M_PI : -M_PI;
+		if(x < 0)
+			_pi = y < 0 ? -M_PI : M_PI;
+
+		return std::arg(inp) + _pi;
+	}
 
 	/*Вычисление вспомогательных степеней коэффициентов полинома.
 	@type b: TEMPLATE*
@@ -112,12 +123,12 @@ class Baydoun
 		std::complex<number> R1, R2;
 		if (o == 0)
 		    if (r > 0){
-		R1 = pow(Rbase + r, onethree);
-		R2 = -R1;
+				R1 = pow(Rbase + r, onethree);
+				R2 = -R1;
 		    }
 		    else{
-		R2 = pow(Rbase - r, onethree);
-		R1 = -R2;
+				R2 = pow(Rbase - r, onethree);
+				R1 = -R2;
 		    }
 		else{
 		    R1 = pow(Rbase + r, onethree);
@@ -132,8 +143,8 @@ class Baydoun
 		auto arg2_1 = A2*bl2;
 		auto arg2_2 = pow(partiond0, static_cast<number>(2.0))*R2;
 		// Вычисляем аргумент комплексного числа
-		auto phi1 = std::arg(arg1_1) - std::arg(arg1_2);
-		auto phi2 = std::arg(arg2_1) - std::arg(arg2_2);
+		auto phi1 = arg(arg1_1) - arg(arg1_2);
+		auto phi2 = arg(arg2_1) - arg(arg2_2); //- M_PI;
 		auto a1 = (cbrt4ftwo)*(std::cos(phi1)+std::complex<number>(0, std::sin(phi1)));
 		auto a2 = (cbrt4ftwo)*(std::cos(phi2)+std::complex<number>(0, std::sin(phi2)));
 		auto a1R1 = a1*R1;
