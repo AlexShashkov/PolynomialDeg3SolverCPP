@@ -54,7 +54,7 @@ int main(){
            std::cout << root << "\n";
         }
     }
-    //delete[] mul_num;
+    delete[] mul_num;
     delete[] polynomial;
     return 0;
 }

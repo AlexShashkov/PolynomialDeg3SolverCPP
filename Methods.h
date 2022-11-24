@@ -22,6 +22,12 @@ class Baydoun
 	long double _sqrt3;
 	long double _cbrt4ftwo;
 
+	/*Аргумент комплексного числа
+	@type int: complex<TEMPLATE>
+	@param inp: Комплексное число.
+	@rtype: TEMPLATE
+	@returns: Аргумент комплексного числа.
+	*/
 	number arg(std::complex<number> inp){
 		number _pi = 0;
 		number x = std::real(inp);
@@ -68,11 +74,11 @@ class Baydoun
 	@returns: Корни уравнения.
 	*/
 	std::vector<std::complex<number>> part2(number *b, number *c, number *d,
-			number o, number r, number bthree){
+			number o, number r, number bthree, number tmp1){
 		number onethree = static_cast<number>(_onethree);
 		number sqrt3    = static_cast<number>(_sqrt3);
 		number cbrt4ftwo= static_cast<number>(_cbrt4ftwo);
-
+		
 		// Самые часто вызываемые переменные
 
 		number b0 = b[0];
@@ -87,16 +93,17 @@ class Baydoun
 		number d0 = d[0];
 		number d1 = d[1];
 		
-		
+		number tmp = std::fma(-b0,c0,d0);
+
 		number c0d0 = c0*d0;
-		number b0c0 = b0*c0;
+		number b0c0 = -tmp + d0;
 		number b0c1 = b0*c1;
 		number b1c1 = b1*c1*static_cast<number>(4);
-		number t = c2*(static_cast<number>(16)*b[5] + static_cast<number>(72)*d1 + static_cast<number>(264)*b2*d0 + static_cast<number>(66)*b1*c1 - \
-		    static_cast<number>(132)*b0*c0d0 + static_cast<number>(2)*c2) + b3*c0*(static_cast<number>(12)*d1 - static_cast<number>(84)*c2) - b1 * \
-		    c1*d0*(static_cast<number>(24)*b2+static_cast<number>(291)*d0) + d[2]*(static_cast<number>(144)*b0c0 - static_cast<number>(27)*d0 - static_cast<number>(2)*b2);
-		number partiond0 = static_cast<number>(4)*(b3*c1 - b2*c0d0) - static_cast<number>(12)*c0*d1 - static_cast<number>(14)*b1*c2 + \
-			static_cast<number>(28)*b0c1*d0 + b1*d1 + c[3];
+
+		number t = c2*(static_cast<number>(16)*b[5] + static_cast<number>(72)*d1 + static_cast<number>(264)*b2*d0 - static_cast<number>(66)*b0c0*(tmp+d0) +\
+			static_cast<number>(2)*c2) + b3*c0*(static_cast<number>(12)*d1 - static_cast<number>(84)*c2) - b1 * \
+			c1*d0*(static_cast<number>(24)*b2+static_cast<number>(291)*d0) + d[2]*(static_cast<number>(144)*b0c0 - static_cast<number>(27)*d0 - static_cast<number>(2)*b2);
+		number partiond0 = static_cast<number>(4)*b2*c0*-tmp + static_cast<number>(14)*b0c1*tmp + b1*c1 - static_cast<number>(12)*c0*d1;
 		std::complex<number> sqrt1;
 		if (o > 0)
 		    sqrt1 = sqrt(o);
@@ -106,17 +113,11 @@ class Baydoun
 		auto sqrt2div3 = sqrt2*onethree;
 		auto sqrt2div9 = sqrt2div3*onethree;
 
-		auto bl = (d0-b0c0) * sqrt1 * (b1c1 - static_cast<number>(4)*b0*c0d0 + static_cast<number>(2)*c2 + d1) +sqrt2div9*t;
+		auto bl = tmp * sqrt1 * (static_cast<number>(4)*b0c0,-tmp,static_cast<number>(2)*c2+d1) +sqrt2div9*t;
 		auto bl1 = pow(bl, onethree);
 		auto bl2 = pow(bl1, static_cast<number>(2.0));
-		auto A1 = (-sqrt2div3)*(static_cast<number>(8)*b2*c0 - static_cast<number>(4)*d0*b1 - static_cast<number>(26)*b0c1 + static_cast<number>(30)*c0d0) + static_cast<number>(2)*c0*sqrt1;
-		/*
-		auto A2 = static_cast<number>(8)*(b[4]*c1 - b3*c0d0) - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
-		    static_cast<number>(29)*b1c1*d0 + static_cast<number>(23)*b0*c[3] - static_cast<number>(21)*c2*d0 +\
-		    static_cast<number>(27)*d[2] - static_cast<number>(99)*b0c0*d1 -sqrt1*sqrt2 * (static_cast<number>(2)*b1c1 - static_cast<number>(10)*b0*c0d0 + c2 + static_cast<number>(3)*d1);
-		*/
-
-		auto A2 = static_cast<number>(8)*(b[4]*c1 - b3*c0d0) - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
+		auto A1 = (-sqrt2div3)*(static_cast<number>(2)*b1*(tmp1 + static_cast<number>(2)*d0) - static_cast<number>(26)*b0c1 + static_cast<number>(30)*c0d0) + static_cast<number>(2)*c0*sqrt1;
+		auto A2 = static_cast<number>(8)*b3*c0*-tmp - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
 		    static_cast<number>(116)*b1c1*d0 + static_cast<number>(23)*b0*c[3] - static_cast<number>(99)*b0c0*d1 - static_cast<number>(21)*c2*d0 +\
 		    static_cast<number>(27)*d[2] -sqrt1*sqrt2 * (static_cast<number>(8)*b1c1 - static_cast<number>(10)*b0*c0d0 + c2 + static_cast<number>(3)*d1);
 		auto Rbase = sqrt1 * sqrt2div9;
@@ -144,7 +145,7 @@ class Baydoun
 		auto arg2_2 = pow(partiond0, static_cast<number>(2.0))*R2;
 		// Вычисляем аргумент комплексного числа
 		auto phi1 = arg(arg1_1) - arg(arg1_2);
-		auto phi2 = arg(arg2_1) - arg(arg2_2); //- M_PI;
+		auto phi2 = arg(arg2_1) - arg(arg2_2); 
 		auto a1 = (cbrt4ftwo)*(std::cos(phi1)+std::complex<number>(0, std::sin(phi1)));
 		auto a2 = (cbrt4ftwo)*(std::cos(phi2)+std::complex<number>(0, std::sin(phi2)));
 		auto a1R1 = a1*R1;
@@ -170,11 +171,15 @@ class Baydoun
 	int solve(number *b, number *c, number *d, std::vector<std::complex<number>> &roots){
 		number d0 = d[0];
 		number b0 = b[0];
+		number c0 = c[0];
 
         number one27 = static_cast<number>(_one27);
 		number bthree = b0*static_cast<number>(_onethree);
-		number o = -static_cast<number>(4)*(b[2]*d0 + c[2]) + b[1]*c[1] + static_cast<number>(18)*b0*c[0]*d0 - static_cast<number>(27)*d[1];
-		number r = static_cast<number>(2)*b[2]*one27 -static_cast<number>(9)*b0*c[0]*one27 + d0;
+
+		number tmp1 = std::fma(static_cast<number>(2)*b0,c0,static_cast<number>(-3)*d0);
+		number o = -b[1]*std::fma(static_cast<number>(4)*b0,d0,-c[1])+static_cast<number>(9)*d0*tmp1 - static_cast<number>(4)*c[2];
+		//number o = -static_cast<number>(4)*(b[2]*d0 + c[2]) + b[1]*c[1] + static_cast<number>(18)*b0*c[0]*d0 - static_cast<number>(27)*d[1];
+		number r = static_cast<number>(2)*b[2]*one27 -static_cast<number>(9)*b0*c0*one27 + d0;
 
 		// std::cout << "_SOLVE o r, one27" << o << " " << r << " " << one27 << "\n";
 
@@ -183,7 +188,7 @@ class Baydoun
 			return 3;
 		}
 		else{
-			roots = part2(b, c, d, o, r,bthree);
+			roots = part2(b, c, d, o, r,bthree,tmp1);
 			// for (auto &r: roots) {
 				// Проверка на нулевые Im
 				// std::cout << std::numeric_limits<number>::epsilon() << "\n";
@@ -334,7 +339,7 @@ class Vieta
 		auto _x = cbrt(R);
 		auto x1 = -static_cast<number>(2)*_x-inp2three;
 		auto x2 = _x-inp2three;
-		std::cout<<"2 действ";
+		// std::cout<<"2 действ";
 		roots = {x1, x2};
 		for (auto &r: roots) {
 			// Проверка на нулевые Im
@@ -367,7 +372,7 @@ class Vieta
 		x1 = sqrtQ*cos(phi)-inp2three;
 		x2 = sqrtQ*cos(phi+pi2div3)-inp2three;
 		x3 = sqrtQ*cos(phi-pi2div3)-inp2three;
-		std::cout<<"3 действ";
+		// std::cout<<"3 действ";
 		roots = {x1, x2, x3};
 		for (auto &r: roots) {
 			// Проверка на нулевые Im
