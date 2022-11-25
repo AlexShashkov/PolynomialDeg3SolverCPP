@@ -2,7 +2,7 @@
 #include "excerpt.h"
 #include "Methods.h"
 
-#define number double
+#define number long double
 
 number test_method(std::vector<number> &roots, std::vector<number> &real_roots, std::string methodname){
     number max_absolute_error, max_relative_error;
@@ -56,14 +56,14 @@ int main(int argc,char* argv[]){
         default: return 1;
     }
 
-    Baydoun<double> SolverB;
-    Vieta<double> SolverV;
+    Baydoun<number> SolverB;
+    Vieta<number> SolverV;
     std::vector<number> deviationsB;
     std::vector<number> deviationsV;
 
     for(int i = 0; i < count; i++){
-        std::vector<double> roots(3), coefficients(4);
-        generate_polynomial<double>(3, 0, 3, 0, 1e-5, -1, 1, roots, coefficients);
+        std::vector<number> roots(3), coefficients(4);
+        generate_polynomial<number>(3, 0, 3, 0, 1e-5, -1, 1, roots, coefficients);
         std::cout << "Coefficients:\n";
         std::cout << "x^3 + (" << coefficients[2] << ")x^2 + (" << coefficients[1] <<
             ")x + (" << coefficients[0] << ") = 0\n";
@@ -72,11 +72,11 @@ int main(int argc,char* argv[]){
             std::cout << "(x" << ((root > 0) ? "-" : "+") << fabs(root) << ")";
         }
         std::cout << "\nResults\n";
-        std::vector<std::complex<double>> b_roots;
-        std::vector<double> b_roots_real;
+        std::vector<std::complex<number>> b_roots;
+        std::vector<number> b_roots_real;
 
         SolverB(coefficients, b_roots, true);
-        std::for_each(b_roots.begin(), b_roots.end(), [count_as_real, &b_roots_real](std::complex<double> x){
+        std::for_each(b_roots.begin(), b_roots.end(), [count_as_real, &b_roots_real](std::complex<number> x){
             if(x.imag() <= count_as_real) b_roots_real.push_back(x.real());
         });
         std::cout << "Baydoun. Found " << b_roots_real.size() << " roots.\n";
@@ -84,10 +84,10 @@ int main(int argc,char* argv[]){
             std::cout << root << "\n";
         }
 
-        std::vector<std::complex<double>> v_roots;
-        std::vector<double> v_roots_real;
+        std::vector<std::complex<number>> v_roots;
+        std::vector<number> v_roots_real;
         SolverV(coefficients, v_roots, true);
-        std::for_each(v_roots.begin(), v_roots.end(), [count_as_real, &v_roots_real](std::complex<double> x){
+        std::for_each(v_roots.begin(), v_roots.end(), [count_as_real, &v_roots_real](std::complex<number> x){
             if(x.imag() <= count_as_real) v_roots_real.push_back(x.real());
         });
         std::cout << "Vieta. Found " << v_roots_real.size() << " roots.\n";

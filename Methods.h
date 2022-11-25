@@ -142,7 +142,7 @@ class Baydoun
 		auto arg1_1 = A1*bl1;
 		auto arg1_2 = -partiond0*R1;
 		auto arg2_1 = A2*bl2;
-		auto arg2_2 = pow(partiond0, static_cast<number>(2.0))*R2;
+		auto arg2_2 = static_cast<number>(pow(partiond0, static_cast<number>(2.0)))*R2;
 		// Вычисляем аргумент комплексного числа
 		auto phi1 = arg(arg1_1) - arg(arg1_2);
 		auto phi2 = arg(arg2_1) - arg(arg2_2); 

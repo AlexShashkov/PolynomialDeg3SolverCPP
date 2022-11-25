@@ -1,7 +1,7 @@
 #include "Methods.h"
 #include "Generate.h"
 
-#define number double
+#define number long double
 
 int main(){
     std::setprecision(30);
