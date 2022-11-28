@@ -2,7 +2,7 @@
 #include "excerpt.h"
 #include "Methods.h"
 
-#define number long double
+#define number float
 
 number test_method(std::vector<number> &roots, std::vector<number> &real_roots, std::string methodname){
     number max_absolute_error, max_relative_error;
@@ -10,13 +10,13 @@ number test_method(std::vector<number> &roots, std::vector<number> &real_roots, 
                                 max_relative_error);
     switch (result) {
         case PR_2_INFINITE_ROOTS:
-            std::cout << "Solution of " << methodname << " contains infinite roots.";
+            std::cout << "Solution of " << methodname << " contains infinite roots. ";
             break;
         case PR_AT_LEAST_ONE_ROOT_IS_FAKE:
-            std::cout << "Solution of " << methodname << " contains at least one fake root.";
+            std::cout << "Solution of " << methodname << " contains at least one fake root. ";
             break;
         case PR_AT_LEAST_ONE_ROOT_LOST:
-            std::cout << "At least one root was lost in " << methodname << ".";
+            std::cout << "At least one root was lost in " << methodname << ". ";
             break;
         default:
             break;

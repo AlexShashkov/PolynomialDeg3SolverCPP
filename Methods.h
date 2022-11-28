@@ -1,6 +1,8 @@
 #ifndef METHODS_H
 #define METHODS_H
+
 #include <cmath>
+#include <numbers>
 #include <vector>
 #include <complex>
 #include <iostream>
@@ -17,10 +19,11 @@ using namespace std::complex_literals;
 template <typename number>
 class Baydoun
 {
-	long double _onethree;
-	long double _one27;
-	long double _sqrt3;
-	long double _cbrt4ftwo;
+	const number PI = std::numbers::pi_v<number>;
+	number onethree;
+	number one27;
+	number sqrt3;
+	number cbrt4ftwo;
 
 	/*Аргумент комплексного числа
 	@type int: complex<TEMPLATE>
@@ -29,15 +32,14 @@ class Baydoun
 	@returns: Аргумент комплексного числа.
 	*/
 	number arg(std::complex<number> inp){
-		number _pi = 0;
 		number x = std::real(inp);
 		number y = std::imag(inp);
-		if(x == 0)
-			return y > 0 ? M_PI : -M_PI;
-		if(x < 0)
-			_pi = y < 0 ? -M_PI : M_PI;
-
-		return std::arg(inp) + _pi;
+		if(x > 0) return std::arg(inp);
+		else{
+			number _pi = y < 0 ? -PI : PI;
+			if(x == 0) return -_pi;
+			return std::arg(inp) + _pi;
+		}
 	}
 
 	/*Вычисление вспомогательных степеней коэффициентов полинома.
@@ -75,10 +77,6 @@ class Baydoun
 	*/
 	std::vector<std::complex<number>> part2(number *b, number *c, number *d,
 			number o, number r, number bthree, number tmp1){
-		number onethree = static_cast<number>(_onethree);
-		number sqrt3    = static_cast<number>(_sqrt3);
-		number cbrt4ftwo= static_cast<number>(_cbrt4ftwo);
-		
 		// Самые часто вызываемые переменные
 
 		number b0 = b[0];
@@ -173,13 +171,11 @@ class Baydoun
 		number b0 = b[0];
 		number c0 = c[0];
 
-        number one27 = static_cast<number>(_one27);
-		number bthree = b0*static_cast<number>(_onethree);
-
 		number tmp1 = std::fma(static_cast<number>(2)*b0,c0,static_cast<number>(-3)*d0);
 		number o = -b[1]*std::fma(static_cast<number>(4)*b0,d0,-c[1])+static_cast<number>(9)*d0*tmp1 - static_cast<number>(4)*c[2];
 		//number o = -static_cast<number>(4)*(b[2]*d0 + c[2]) + b[1]*c[1] + static_cast<number>(18)*b0*c[0]*d0 - static_cast<number>(27)*d[1];
 		number r = static_cast<number>(2)*b[2]*one27 -static_cast<number>(9)*b0*c0*one27 + d0;
+		number bthree = b0*onethree;
 
 		// std::cout << "_SOLVE o r, one27" << o << " " << r << " " << one27 << "\n";
 
@@ -201,10 +197,15 @@ class Baydoun
 
 public:
 	Baydoun(){
-		_onethree = 1.0L/3.0L;
-		_one27 = _onethree*_onethree*_onethree;
-		_sqrt3 = std::sqrt(3L);
-		_cbrt4ftwo = pow(4L,_onethree)*static_cast<number>(0.5);
+		long double _onethree = 1.0L/3.0L;
+		long double _one27 = _onethree*_onethree*_onethree;
+		long double _sqrt3 = std::sqrt(3L);
+		long double _cbrt4ftwo = pow(4L,_onethree)*static_cast<number>(0.5);
+
+		onethree = static_cast<number>(_onethree);
+		one27 = static_cast<number>(_one27);
+		sqrt3 = static_cast<number>(_sqrt3);
+		cbrt4ftwo = static_cast<number>(_cbrt4ftwo);
 	}
 
 	/*Функтор для решения уравнения методом Baydoun.
@@ -225,10 +226,9 @@ public:
 			std::vector<std::complex<number>> &roots){
         // x^3, x^2, x, c
 		if(a != 0 && std::isfinite(a)){
-		    number _a = 1/a;
-		    b *= _a;
-		    c *= _a;
-		    d *= _a;
+		    b /= a;
+		    c /= a;
+		    d /= a;
 		    a = 1;
 		}
 		else
@@ -316,9 +316,10 @@ http://poivs.tsput.ru/ru/Math/Functions/Polynomials/VietaTrigonometricFormula
 template <typename number>
 class Vieta
 {
-	long double _pi2div3;
-	long double _sqrt3;
-	long double _onethree;
+	const number PI = std::numbers::pi_v<number>;
+	number pi2div3;
+	number sqrt3;
+	number onethree;
 
 	int sign(number val) {
 		if( number(0) < val){ return -1; }
@@ -335,7 +336,7 @@ class Vieta
 	*/
 	std::vector<std::complex<number>> degenerate(number R, number b){
 		std::vector<std::complex<number>> roots;
-		auto inp2three = b*static_cast<number>(_onethree);
+		auto inp2three = b*onethree;
 		auto _x = cbrt(R);
 		auto x1 = -static_cast<number>(2)*_x-inp2three;
 		auto x2 = _x-inp2three;
@@ -365,9 +366,9 @@ class Vieta
 	std::vector<std::complex<number>> usual(number Q, number Q3, number R, number b){
 		std::vector<std::complex<number>> roots;
 		number x1,x2,x3 = 0;
-		number pi2div3 = b*static_cast<number>(_pi2div3);
-		number inp2three = b*static_cast<number>(_onethree);
-		number phi = acos(R/sqrt(Q3))*static_cast<number>(_onethree);
+		number pi2div3 = b*pi2div3;
+		number inp2three = b*onethree;
+		number phi = acos(R/sqrt(Q3))*onethree;
 		number sqrtQ = static_cast<number>(-2)*sqrt(Q);
 		x1 = sqrtQ*cos(phi)-inp2three;
 		x2 = sqrtQ*cos(phi+pi2div3)-inp2three;
@@ -396,8 +397,6 @@ class Vieta
 	@returns: Вектор, хранящий корни уравнения.
 	*/
 	std::vector<std::complex<number>> complex(number Q, number Q3, number R, number b){
-        number onethree = static_cast<number>(_onethree);
-        number sqrt3 = static_cast<number>(_sqrt3);
 		std::vector<std::complex<number>> roots;
 		number x1 = 0;
 		std::complex<number>  x2, x3 = 0;
@@ -433,9 +432,13 @@ class Vieta
 	}
 public:
 	Vieta(){
-		_pi2div3 = 2L*static_cast<number>(M_PI)/3L;
-		_sqrt3 = sqrt(3L);
-		_onethree = 1.0L/3.0L;
+		long double _pi2div3 = 2L*PI/3L;
+		long double _sqrt3 = sqrt(3L);
+		long double _onethree = 1.0L/3.0L;
+
+		pi2div3 = static_cast<number>(_pi2div3);
+		sqrt3 = static_cast<number>(_sqrt3);
+		onethree = static_cast<number>(_onethree);
 	}
 
         /*Функтор для решения уравнения методом Baydoun.
@@ -455,12 +458,10 @@ public:
 	int operator()(number a, number b, number c, number d,
 			std::vector<std::complex<number>> &roots){
 		// x^3, x^2, x, c
-		number onethree = static_cast<number>(_onethree);
 		if(a != 0 && std::isfinite(a)){
-		    number _a = 1/a;
-		    b *= _a;
-		    c *= _a;
-		    d *= _a;
+		    b /= a;
+		    c /= a;
+		    d /= a;
 		    a = 1;
 		}
 		else
