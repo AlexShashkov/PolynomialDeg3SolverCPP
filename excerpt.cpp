@@ -16,46 +16,6 @@ inline fp_t pr_product_difference(fp_t a, fp_t b, fp_t c, fp_t d) {
     return std::fma(a, b, -tmp) + std::fma(-d, c, tmp);
 }
 
-
-// Finds all real roots of a quadratic polynomial in the form: a*x^2 + b*x + c = 0
-// This implementation should process correctly all the situations and returns 0,1 (linear case, a=0 !) or 2 roots. It returns
-// double quadratic root twice, in order to keep statistics more correct way; it serves solely verification purposes because
-// no optimizations and enhancements introduced
-int polyroots2plain(float a, float b, float c, // polynomial coefficients
-                    std::vector<float> &roots) // pre allocated vector where to put the roots; the size should not be less than 2
-{
-    auto tmp = 0.0F, D = 0.0F;
-    if (a != 0.0F) {
-        tmp = b / a;
-        D = c / a;
-    }
-    if (a == 0.0F || std::isinf(std::abs(tmp)) ||
-        std::isinf(std::abs(D))) // exactly or technically, the polynomial is not quadratic: believe a=0
-    {
-        if (b == 0.0F) return 0;
-        tmp = -c / b;
-        if (std::isinf(std::abs(tmp))) return 0;
-        roots[0] = tmp;
-        return 1;
-    }
-
-// non-degenerate quadratic polynomial is resulted and further on processed
-    D = b * b - 4.0F * a * c; // discriminant
-
-    if (D >= 0.0F) // 2 distinct real roots or a single root
-    {
-        roots[0] = tmp = (-b - std::copysignf(std::sqrt(D), b)) / (2.0F * a);
-        if (D == 0.0F) {
-            roots[1] = tmp;
-            return 2;
-        }
-        roots[1] = c / tmp;
-        if (std::isinf(std::abs(roots[1]))) roots[1] = (-b + std::copysignf(std::sqrt(D), b)) / (2.0F * a);
-        return 2;
-    } else return 0; // D<0.0
-}
-
-
 // Creates a test polynomial, both in the form of roots, e.g. (x-roots[0])*(x-roots[1])*(quadratic polynomial with no real roots)
 // and represented by its coefficients, e.g.
 // (coefficients[4]=1)*x^4 + coefficients[3]*x^3 + coefficients[2]*x^2 + coefficients[1]*x + coefficients[0].
@@ -76,7 +36,9 @@ int generate_polynomial(
     int n_simple_roots = P - 2 * N_pairs_of_complex_roots - N_clustered_roots - N_multiple_roots;
     assert(N_clustered_roots != 1);
     assert(N_multiple_roots != 1);
-    assert(n_simple_roots >= 0 && P <= 4);
+    assert(n_simple_roots >= 0);
+    assert(P > 0 && P <= 4);
+    assert(max_distance_between_clustered_roots > static_cast<fp_t>(0.0L));
     assert(root_sweep_high - root_sweep_low > 2 * P * max_distance_between_clustered_roots);
 
     unsigned long long seed =
@@ -86,8 +48,9 @@ int generate_polynomial(
                                              root_sweep_high); // uniform random data generator for single roots
     std::uniform_real_distribution<fp_t> rnc(static_cast<fp_t>(0.0L),
                                              max_distance_between_clustered_roots); // uniform random data generator for root clusters
-    fp_t re, im, u, v, root_mid_sweep = root_sweep_low + 0.5 * (root_sweep_high - root_sweep_low);
-    long double RE, IM, U, V; // high-precisioon counterparts of re, im, u, v
+    fp_t re, im, u, v;
+    auto root_mid_sweep = root_sweep_low + 0.5 * (root_sweep_high - root_sweep_low);
+    long double RE, IM, U, V, TMP; // high-precisioon counterparts of re, im, u, v
 
     coefficients[P] = static_cast<fp_t>(1.0L); // invariant
     switch (P) {
@@ -186,27 +149,32 @@ int generate_polynomial(
             if (N_pairs_of_complex_roots == 2) // no real roots
             {
                 re = rnr(rng);
-                im = rnr(rng);
-                im = re * re + im * im;
-                re *= static_cast<fp_t>(-2.0L); // irreducible quadratic polynomial is (x^2 + re*x + im)
+                while (std::abs(im = rnr(rng)) < std::abs(re)) {}
+                RE = re;
+                IM = im;
+                IM = pr_product_difference(RE, RE, -IM, IM); // RE*RE+IM*IM
+                RE *= -2.0L; // irreducible quadratic polynomial is (x^2 + re*x + im)
                 u = rnr(rng);
-                v = rnr(rng);
-                v = u * u + v * v;
-                u *= static_cast<fp_t>(-2.0L); // irreducible quadratic polynomial is (x^2 + u*x + v)
-                // multiply both irreducible quadratics
-                coefficients[0] = im * v;
-                coefficients[1] = re * v + im * u;
-                coefficients[2] = im + re * u + v;
-                coefficients[3] = re + u;
+                while (std::abs(v = rnr(rng)) < std::abs(u)) {}
+                U = u;
+                V = v;
+                V = pr_product_difference(U, U, -V, V); // U*U+V*V
+                U *= -2.0L; // irreducible quadratic polynomial is (x^2 + u*x + v)
+                // multiply both irreducible quadrics
+                coefficients[0] = static_cast<fp_t>(IM * V);
+                coefficients[1] = static_cast<fp_t>(pr_product_difference(RE, V, -IM, U)); // RE*V+IM*U;
+                coefficients[2] = static_cast<fp_t>(std::fma(RE, U, IM + V)); // IM+RE*U+V
+                coefficients[3] = static_cast<fp_t>(RE + U);
                 return 0;
             } else if (N_pairs_of_complex_roots == 1) // two real roots
             {
                 re = rnr(rng);
-                im = rnr(rng);
-                roots[0] = u = rnr(rng);
-                im = re * re + im * im;
-                re *= static_cast<fp_t>(-2.0L); // irreducible quadratic polynomial is (x^2 + re*x + im); multiply it by (x-u)
-
+                while (std::abs(im = rnr(rng)) < std::abs(re)) {}
+                RE = re;
+                IM = im;
+                IM = pr_product_difference(RE, RE, -IM, IM); // RE*RE+IM*IM
+                RE *= -2.0L; // irreducible quadratic polynomial is (x^2 + re*x + im); multiply it by the rest
+                // 2 real roots follow
                 if (N_clustered_roots == 2) // 2 clustered roots
                 {
                     roots[0] = u = rnr(rng);
@@ -219,14 +187,16 @@ int generate_polynomial(
                     roots[0] = u = rnr(rng);
                     roots[1] = v = rnr(rng);
                 }
-                root_mid_sweep = -u - v;
-                v *= u;
-                u = root_mid_sweep; // two-root quadratic polynomial is (x^2 + u*x + v)
+                U = u;
+                V = v;
+                TMP = -U - V;
+                V *= U;
+                U = TMP; // two-real-root quadratic polynomial is (x^2 + u*x + v)
                 // multiply irreducible and reducible quadrics
-                coefficients[0] = im * v;
-                coefficients[1] = re * v + im * u;
-                coefficients[2] = im + re * u + v;
-                coefficients[3] = re + u;
+                coefficients[0] = static_cast<fp_t>(IM * V);
+                coefficients[1] = static_cast<fp_t>(pr_product_difference(RE, V, -IM, U)); // RE*V+IM*U
+                coefficients[2] = static_cast<fp_t>(std::fma(RE, U, IM + V)); // IM+RE*U+V
+                coefficients[3] = static_cast<fp_t>(RE + U);
                 return 2;
             } else if (N_clustered_roots == 4) // 4 clustered roots
             {
@@ -234,18 +204,19 @@ int generate_polynomial(
                 im = rnc(rng);
                 u = rnc(rng);
                 v = rnc(rng);
-                roots[1] = im = (re > root_mid_sweep ? roots[3] = v = (re - im - u - v), roots[2] = u = (re - im - u),
-                        re - im :
-                        roots[3] = v = (re + im + u + v), roots[2] = u = (re + im + u), re + im);
+                roots[1] = im = (re > root_mid_sweep ? (roots[3] = v = (re - im - u - v), roots[2] = u = (re - im - u),
+                        re - im) :
+                                 (roots[3] = v = (re + im + u + v), roots[2] = u = (re + im + u), re + im));
             } else if (N_clustered_roots == 3) // 3 clustered roots and 1 single root
             {
                 roots[0] = re = rnr(rng);
                 im = rnc(rng);
                 u = rnc(rng);
-                roots[1] = im = (re > root_mid_sweep ? roots[2] = u = (re - im - u), re - im : roots[2] = u = (re + im +
-                                                                                                               u), re +
-                                                                                                                   im);
-                roots[3] = v = rnc(rng); // 1 single root
+                roots[1] = im = (re > root_mid_sweep ? (roots[2] = u = (re - im - u), re - im) : (roots[2] = u = (re +
+                                                                                                                  im +
+                                                                                                                  u),
+                        re + im));
+                roots[3] = v = rnr(rng); // a single root
             } else if (N_clustered_roots == 2) // 2 clustered roots
             {
                 roots[0] = re = rnr(rng);
@@ -277,20 +248,24 @@ int generate_polynomial(
                 roots[3] = v = rnr(rng);
             }
             // compute coefficients from 4 roots: re, im, u, v
-            root_mid_sweep = -re - im;
-            im *= re;
-            re = root_mid_sweep; // now we have the 1.st quadratic polynomial: x^2 + x*re + im
-            root_mid_sweep = -u - v;
-            v *= u;
-            u = root_mid_sweep; // now we have the 2.nd quadratic polynomial: x^2 + x*u + v
-            coefficients[0] = im * v;
-            coefficients[1] = re * v + im * u;
-            coefficients[2] = re * u + im + v;
-            coefficients[3] = re + u;
+            RE = re;
+            IM = im;
+            U = u;
+            V = v;
+            TMP = -RE - IM;
+            IM *= RE;
+            RE = TMP; // now we have the 1.st quadratic polynomial: x^2 + x*re + im
+            TMP = -U - V;
+            V *= U;
+            U = TMP; // now we have the 2.nd quadratic polynomial: x^2 + x*u + v
+            coefficients[0] = static_cast<fp_t>(IM * V);
+            coefficients[1] = static_cast<fp_t>(pr_product_difference(RE, V, -IM, U)); // RE*V+IM*U
+            coefficients[2] = static_cast<fp_t>(std::fma(RE, U, IM + V)); // IM+RE*U+V
+            coefficients[3] = static_cast<fp_t>(RE + U);
             return 4;
         } // P=4
         default:
-            break;
+            return -1;
     } // switch (P)
     return -1; // unreachable, means a flaw in control here
 }
@@ -309,16 +284,16 @@ int compare_roots(
         // will be placed
         fp_t &max_relative_error) // here the greatest relative error among all the roots found will be placed
 {
-    auto absolute_error_max = static_cast<fp_t>(0.0L), relative_error_max = static_cast<fp_t>(0.0L);
+    fp_t deviation, absolute_error_max = static_cast<fp_t>(0.0L), relative_error_max = static_cast<fp_t>(0.0L);
     auto rv = (N_roots_to_check < N_roots_ground_truth) ? PR_AT_LEAST_ONE_ROOT_LOST :
               ((N_roots_to_check > N_roots_ground_truth) ? PR_AT_LEAST_ONE_ROOT_IS_FAKE : PR_NUMBERS_OF_ROOTS_EQUAL);
 // find the largest distance between the closest pairs of roots: one - from ground truth, one - from found ones
-    for (auto i = 0; i < N_roots_ground_truth; ++i) {
+    for (int i = 0; i < N_roots_ground_truth; ++i) {
         // find the closest found root to the given ground truth root
         auto deviation_min_for_this_root = std::numeric_limits<fp_t>::infinity();
         auto i_closest_root = -1, j_closest_root = -1;
-        for (auto j = 0; j < N_roots_to_check; ++j) {
-            auto deviation = std::abs(roots_ground_truth[i] - roots_to_check[j]);
+        for (int j = 0; j < N_roots_to_check; ++j) {
+            deviation = std::abs(roots_ground_truth[i] - roots_to_check[j]);
             deviation_min_for_this_root =
                     deviation < deviation_min_for_this_root ? i_closest_root = i, j_closest_root = j, deviation
                                                             : deviation_min_for_this_root;
@@ -346,17 +321,18 @@ int number_of_roots(unsigned P, // polynomial degree
 {
     switch (P) {
         case 1: {
-            auto x1 = -e / d;
+            fp_t x1 = -e / d;
             return std::isinf(x1) ? 0 : 1;
+
         }
         case 2: {
-            auto x1 = d / (static_cast<fp_t>(-2.0L) * c);
+            fp_t x1 = d / (static_cast<fp_t>(-2.0L) * c);
             if (std::isinf(x1)) // technically is degenerated quadratic
             {
                 x1 = -e / d;
                 return std::isinf(x1) ? 0 : 1;
             }
-            auto y1 = std::fma(c, x1, d);
+            fp_t y1 = std::fma(c, x1, d);
             y1 = std::fma(y1, x1, e); // y1=c*x1^2+d*x1+e
             return c * y1 < static_cast<fp_t>(0.0L) ? 2 : 0;
         }
@@ -364,7 +340,7 @@ int number_of_roots(unsigned P, // polynomial degree
             std::cerr << "P=" << " not implemented";
             assert(0);
         default:
-            break;
+            return -1;
     }
     return -1; // inaccessible
 }
@@ -374,7 +350,10 @@ int compare_roots_complex(unsigned N_roots_to_check, // number of roots in roots
                           unsigned N_roots_ground_truth,  // number of roots in roots_ground_truth
                           std::vector<std::complex<fp_t>> &roots_to_check, // one should take into account only first (N_roots_to_check) rots
                           std::vector<fp_t> &roots_ground_truth, // one should take into account only first (N_roots_ground_truth) rots
-                          fp_t &max_deviation) {
+                          fp_t &max_absolute_error, // here the greatest among the smallest deviations of the roots in (roots_to_check) and (roots_ground_truth)
+        // will be placed
+        // here the greatest relative error among all the roots found will be placed
+                          fp_t &max_relative_error) {
     std::vector<fp_t> roots_to_check_parsed;
     for (auto root: roots_to_check) {
         if (std::numeric_limits<fp_t>::epsilon() > abs(root.imag())) {
@@ -382,7 +361,7 @@ int compare_roots_complex(unsigned N_roots_to_check, // number of roots in roots
         }
     }
     return compare_roots(roots_to_check_parsed.size(), N_roots_ground_truth, roots_to_check_parsed, roots_ground_truth,
-                         max_deviation);
+                         max_absolute_error, max_relative_error);
 }
 
 template int generate_polynomial<float>(unsigned P, unsigned N_pairs_of_complex_roots, unsigned N_clustered_roots,
@@ -425,3 +404,31 @@ template int compare_roots<long double>(
         std::vector<long double> &roots_ground_truth,
         long double &max_absolute_error,
         long double &max_relative_error);
+
+
+template int compare_roots_complex<float>(unsigned N_roots_to_check, // number of roots in roots_to_check
+                                          unsigned N_roots_ground_truth,  // number of roots in roots_ground_truth
+                                          std::vector<std::complex<float>> &roots_to_check, // one should take into account only first (N_roots_to_check) rots
+                                          std::vector<float> &roots_ground_truth, // one should take into account only first (N_roots_ground_truth) rots
+                                          float &max_absolute_error, // here the greatest among the smallest deviations of the roots in (roots_to_check) and (roots_ground_truth)
+        // will be placed
+        // here the greatest relative error among all the roots found will be placed
+                                          float &max_relative_error);
+
+template int compare_roots_complex<double>(unsigned N_roots_to_check, // number of roots in roots_to_check
+                                           unsigned N_roots_ground_truth,  // number of roots in roots_ground_truth
+                                           std::vector<std::complex<double>> &roots_to_check, // one should take into account only first (N_roots_to_check) rots
+                                           std::vector<double> &roots_ground_truth, // one should take into account only first (N_roots_ground_truth) rots
+                                           double &max_absolute_error, // here the greatest among the smallest deviations of the roots in (roots_to_check) and (roots_ground_truth)
+        // will be placed
+        // here the greatest relative error among all the roots found will be placed
+                                           double &max_relative_error);
+
+template int compare_roots_complex<long double>(unsigned N_roots_to_check, // number of roots in roots_to_check
+                                                unsigned N_roots_ground_truth,  // number of roots in roots_ground_truth
+                                                std::vector<std::complex<long double>> &roots_to_check, // one should take into account only first (N_roots_to_check) rots
+                                                std::vector<long double> &roots_ground_truth, // one should take into account only first (N_roots_ground_truth) rots
+                                                long double &max_absolute_error, // here the greatest among the smallest deviations of the roots in (roots_to_check) and (roots_ground_truth)
+        // will be placed
+        // here the greatest relative error among all the roots found will be placed
+                                                long double &max_relative_error);

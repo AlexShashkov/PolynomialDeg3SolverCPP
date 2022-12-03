@@ -28,7 +28,7 @@ number test_method(std::vector<number> &roots, std::vector<number> &real_roots, 
 int main(int argc,char* argv[]){
     std::setprecision(30);
     int count;
-    number count_as_real = 1e-2;
+    number count_as_real = 1;
     number allowed_deviation = 0;
 
     switch(argc){

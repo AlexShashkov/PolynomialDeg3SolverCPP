@@ -1,35 +1,27 @@
 #include "Methods.h"
 #include "Generate.h"
 
-#define number long double
+#define number float
 
 int main(){
     std::setprecision(30);
-    std::vector<std::complex<number>> gen_roots;
-    auto polynomial = generatePolynomial<number>(-1, 1, 0.0001, -0.00001, 0.00001, gen_roots);
-    std::cout << "Сгенерированные корни:\n";
-    for (auto &root : gen_roots){
-       std::cout << root << "\n";
-    }
-    std::cout << "Коэффициенты полинома X^3, x^2, x, c:\n";
-    for(int i = 0; i<4; i++){
-        std::cout << polynomial[i] << " ";
-    }
-    std::cout << "\n";
 
     Baydoun<number> SolverB;
     auto SolverV = Vieta<number>();
     std::vector<std::complex<number>> roots;
-    int roots_num = SolverB(polynomial[0],polynomial[1],polynomial[2],polynomial[3], roots);
+    // x^3 + (0.485677)x^2 + (0.0786274)x + (0.00424306) = 0
+    int roots_num = SolverB(1.0f, 0.485677f, 0.0786274f, 0.00424306f, roots);
     std::cout << "Baydoun. Найдено " << roots_num << " корня.\n";
     for (auto &root : roots){
         std::cout << root << "\n";
     }
-    roots_num = SolverV(polynomial[0],polynomial[1],polynomial[2],polynomial[3], roots);
+    
+    roots_num = SolverV(1.0f, 0.485677f, 0.0786274f, 0.00424306f, roots);
     std::cout << "Vieta. Найдено " << roots_num << " корня.\n";
     for (auto &root : roots){
         std::cout << root << "\n";
     }
+    return 0;
     number arr[][4] = {
         {12.0, 34.2, 56.99, 7.2},
         {1.0, 1.0, 1.0, 1.0},
@@ -55,6 +47,5 @@ int main(){
         }
     }
     delete[] mul_num;
-    delete[] polynomial;
     return 0;
 }

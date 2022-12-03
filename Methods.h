@@ -108,17 +108,17 @@ class Baydoun
 		else
 		    sqrt1 = std::complex<number>(0, 1)*static_cast<number>(sqrt(fabs(o)));
 		std::complex<number> sqrt2 = std::complex<number>(0, 1)*sqrt3;
-		auto sqrt2div3 = sqrt2*onethree;
-		auto sqrt2div9 = sqrt2div3*onethree;
+		std::complex<number>  sqrt2div3 = sqrt2*onethree;
+		std::complex<number>  sqrt2div9 = sqrt2div3*onethree;
 
-		auto bl = tmp * sqrt1 * (static_cast<number>(4)*b0c0,-tmp,static_cast<number>(2)*c2+d1) +sqrt2div9*t;
-		auto bl1 = pow(bl, onethree);
-		auto bl2 = pow(bl1, static_cast<number>(2.0));
-		auto A1 = (-sqrt2div3)*(static_cast<number>(2)*b1*(tmp1 + static_cast<number>(2)*d0) - static_cast<number>(26)*b0c1 + static_cast<number>(30)*c0d0) + static_cast<number>(2)*c0*sqrt1;
-		auto A2 = static_cast<number>(8)*b3*c0*-tmp - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
+		std::complex<number>  bl = tmp * sqrt1 * (static_cast<number>(4)*b0c0-tmp+static_cast<number>(2)*c2+d1) + sqrt2div9*t; // ?
+		std::complex<number>  bl1 = pow(bl, onethree);
+		std::complex<number>  bl2 = pow(bl1, static_cast<number>(2.0));
+		std::complex<number>  A1 = (-sqrt2div3)*(static_cast<number>(2)*b1*(tmp1 + static_cast<number>(2)*d0) - static_cast<number>(26)*b0c1 + static_cast<number>(30)*c0d0) + static_cast<number>(2)*c0*sqrt1;
+		std::complex<number>  A2 = static_cast<number>(8)*b3*c0*-tmp - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
 		    static_cast<number>(116)*b1c1*d0 + static_cast<number>(23)*b0*c[3] - static_cast<number>(99)*b0c0*d1 - static_cast<number>(21)*c2*d0 +\
 		    static_cast<number>(27)*d[2] -sqrt1*sqrt2 * (static_cast<number>(8)*b1c1 - static_cast<number>(10)*b0*c0d0 + c2 + static_cast<number>(3)*d1);
-		auto Rbase = sqrt1 * sqrt2div9;
+		std::complex<number>  Rbase = sqrt1 * sqrt2div9;
 		std::complex<number> R1, R2;
 		if (o == 0)
 		    if (r > 0){
@@ -133,24 +133,24 @@ class Baydoun
 		    R1 = pow(Rbase + r, onethree);
 		    R2 = pow(Rbase - r, onethree);
 		}
-		auto sqrt205=sqrt2*static_cast<number>(0.5);
+		std::complex<number>  sqrt205=sqrt2*static_cast<number>(0.5);
 		std::complex<number> M[2] = {static_cast<number>(0.5) - sqrt205, static_cast<number>(0.5) + sqrt205};
 		std::complex<number> M2[2] = {static_cast<number>(-0.5) - sqrt205, static_cast<number>(-0.5) + sqrt205};
 
-		auto arg1_1 = A1*bl1;
-		auto arg1_2 = -partiond0*R1;
-		auto arg2_1 = A2*bl2;
-		auto arg2_2 = static_cast<number>(pow(partiond0, static_cast<number>(2.0)))*R2;
+		std::complex<number>  arg1_1 = A1*bl1;
+		std::complex<number>  arg1_2 = -partiond0*R1;
+		std::complex<number>  arg2_1 = A2*bl2;
+		std::complex<number>  arg2_2 = static_cast<number>(pow(partiond0, static_cast<number>(2)))*R2;
 		// Вычисляем аргумент комплексного числа
-		auto phi1 = arg(arg1_1) - arg(arg1_2);
-		auto phi2 = arg(arg2_1) - arg(arg2_2); 
-		auto a1 = (cbrt4ftwo)*(std::cos(phi1)+std::complex<number>(0, std::sin(phi1)));
-		auto a2 = (cbrt4ftwo)*(std::cos(phi2)+std::complex<number>(0, std::sin(phi2)));
-		auto a1R1 = a1*R1;
-		auto a2R2 = a2*R2;
-		auto x1 = -a1R1 + a2R2 - bthree;
-		auto x2 = M[0]*a1R1 + M2[0]*a2R2 - bthree;
-		auto x3 = M[1]*a1R1 + M2[1]*a2R2 - bthree;
+		number phi1 = arg(arg1_1) - arg(arg1_2);
+		number phi2 = arg(arg2_1) - arg(arg2_2); 
+		std::complex<number>  a1 = (cbrt4ftwo)*(std::cos(phi1)+std::complex<number>(0, std::sin(phi1)));
+		std::complex<number>  a2 = (cbrt4ftwo)*(std::cos(phi2)+std::complex<number>(0, std::sin(phi2)));
+		std::complex<number>  a1R1 = a1*R1;
+		std::complex<number>  a2R2 = a2*R2;
+		std::complex<number>  x1 = -a1R1 + a2R2 - bthree;
+		std::complex<number>  x2 = M[0]*a1R1 + M2[0]*a2R2 - bthree;
+		std::complex<number>  x3 = M[1]*a1R1 + M2[1]*a2R2 - bthree;
 		return std::vector<std::complex<number>>{x1, x2, x3};
 	}
 
@@ -185,12 +185,6 @@ class Baydoun
 		}
 		else{
 			roots = part2(b, c, d, o, r,bthree,tmp1);
-			// for (auto &r: roots) {
-				// Проверка на нулевые Im
-				// std::cout << std::numeric_limits<number>::epsilon() << "\n";
-				// if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
-			// }
-			// roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
 			return roots.size();
 		};
 	}
@@ -337,17 +331,15 @@ class Vieta
 	std::vector<std::complex<number>> degenerate(number R, number b){
 		std::vector<std::complex<number>> roots;
 		auto inp2three = b*onethree;
-		auto _x = cbrt(R);
+		number _x = cbrt(R);
 		auto x1 = -static_cast<number>(2)*_x-inp2three;
 		auto x2 = _x-inp2three;
-		// std::cout<<"2 действ";
 		roots = {x1, x2};
 		for (auto &r: roots) {
 			// Проверка на нулевые Im
 			// std::cout << std::numeric_limits<number>::epsilon() << "\n";
 			if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
 		}
-		// roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
 		return roots;
 	}
 
@@ -373,14 +365,10 @@ class Vieta
 		x1 = sqrtQ*cos(phi)-inp2three;
 		x2 = sqrtQ*cos(phi+pi2div3)-inp2three;
 		x3 = sqrtQ*cos(phi-pi2div3)-inp2three;
-		// std::cout<<"3 действ";
 		roots = {x1, x2, x3};
 		for (auto &r: roots) {
-			// Проверка на нулевые Im
-			// std::cout << std::numeric_limits<number>::epsilon() << "\n";
 			if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
 		}
-		// roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
 		return roots;
 	}
 

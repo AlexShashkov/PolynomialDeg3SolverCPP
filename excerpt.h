@@ -20,14 +20,6 @@
 #include <iomanip>
 #include <complex>
 
-// Finds all real roots of a quadratic polynomial in the form: a*x^2 + b*x + c = 0
-// This implementation should process correctly all the situations and returns 0,1 (linear case, a=0 !) or 2 roots. It returns
-// double quadratic root twice, in order to keep statistics more correct way; it serves solely verification purposes because
-// no optimizations and enhancements introduced
-int polyroots2plain(float a, float b, float c, // polynomial coefficients
-        // pre allocated vector where to put the roots; the size should not be less than 2
-                    std::vector<float> &roots);
-
 // checks attainable number of real roots in a polynomial: a*x^4 + b*x^3 + c*x^2 + d*x + e; multiple root is treated as separate roots
 template<typename fp_t>
 int number_of_roots(unsigned P, // polynomial degree
@@ -68,6 +60,9 @@ int compare_roots_complex(unsigned N_roots_to_check, // number of roots in roots
                           unsigned N_roots_ground_truth,  // number of roots in roots_ground_truth
                           std::vector<std::complex<fp_t>> &roots_to_check, // one should take into account only first (N_roots_to_check) rots
                           std::vector<fp_t> &roots_ground_truth, // one should take into account only first (N_roots_ground_truth) rots
-                          fp_t &max_deviation);
+                          fp_t &max_absolute_error, // here the greatest among the smallest deviations of the roots in (roots_to_check) and (roots_ground_truth)
+        // will be placed
+        // here the greatest relative error among all the roots found will be placed
+                          fp_t &max_relative_error);
 
 #endif //POLYROOTS1234_HPP
