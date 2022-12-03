@@ -1,6 +1,8 @@
 #ifndef METHODS_H
 #define METHODS_H
 
+#define THRESHOLD 1e-5
+
 #include <cmath>
 #include <numbers>
 #include <vector>
@@ -101,7 +103,8 @@ class Baydoun
 		number t = c2*(static_cast<number>(16)*b[5] + static_cast<number>(72)*d1 + static_cast<number>(264)*b2*d0 - static_cast<number>(66)*b0c0*(tmp+d0) +\
 			static_cast<number>(2)*c2) + b3*c0*(static_cast<number>(12)*d1 - static_cast<number>(84)*c2) - b1 * \
 			c1*d0*(static_cast<number>(24)*b2+static_cast<number>(291)*d0) + d[2]*(static_cast<number>(144)*b0c0 - static_cast<number>(27)*d0 - static_cast<number>(2)*b2);
-		number partiond0 = static_cast<number>(4)*b2*c0*-tmp + static_cast<number>(14)*b0c1*tmp + b1*c1 - static_cast<number>(12)*c0*d1;
+		// number partiond0 = static_cast<number>(4)*b2*c0*-tmp + static_cast<number>(14)*b0c1*tmp + b1*d1 - static_cast<number>(12)*c0*d1;
+		number partiond0 = static_cast<number>(4)*b2*c0*-tmp + static_cast<number>(14)*b0c1*(tmp+d0)+ b1*d1 + c[3]- static_cast<number>(12)*c0*d1;
 		std::complex<number> sqrt1;
 		if (o > 0)
 		    sqrt1 = sqrt(o);
