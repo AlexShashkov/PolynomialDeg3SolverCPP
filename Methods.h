@@ -32,7 +32,7 @@ namespace implementations{
 	}
 
 	template <typename number>
-	inline number fms(number a, number b, number c, number d) {
+	number fms(number a, number b, number c, number d) {
 		auto tmp = d * c;
 		return std::fma(a, b, -tmp);
 	}
@@ -120,9 +120,11 @@ namespace implementations{
 			number b0c1 = b0*c1;
 			number b1c1 = b1*c1;
 
-			number t = c2*(static_cast<number>(16)*b[5] + static_cast<number>(72)*d1 + static_cast<number>(264)*b2*d0 - static_cast<number>(66)*b0c0*(tmp+d0) +\
-				static_cast<number>(2)*c2) + b3*c0*(static_cast<number>(12)*d1 - static_cast<number>(84)*c2) - b1 * \
-				c1*d0*(static_cast<number>(24)*b2+static_cast<number>(291)*d0) + d[2]*(static_cast<number>(144)*b0c0 - static_cast<number>(27)*d0 - static_cast<number>(2)*b2);
+			number t = fms(c2, fms(static_cast<number>(2), std::fma(static_cast<number>(12)*d0, 
+				fms(static_cast<number>(3), d0, static_cast<number>(-11), b2), std::fma(static_cast<number>(8), b[5], c2)),
+				static_cast<number>(66)*b0c0, (tmp+d0)), static_cast<number>(12)*b3*c0, std::fma(static_cast<number>(7),c2,-d1)) + \
+				fms(d[2], fms(static_cast<number>(2)*b0, std::fma(static_cast<number>(72), c0, -b1),static_cast<number>(27),d0),
+				b1c1, d0*static_cast<number>(3)*fms(static_cast<number>(8), b2, static_cast<number>(-97),d0));
 			number partiond0 = std::fma(tmp,fms(static_cast<number>(14)*b0,c1,static_cast<number>(4)*b2,c0),fms(static_cast<number>(14)*b0c1,d0,static_cast<number>(12)*c0,d1))+ std::fma(b1,d1,c[3]);
 			std::complex<number> sqrt1;
 			if (o > THRESHOLD)
@@ -137,14 +139,11 @@ namespace implementations{
 			std::complex<number> bl1 = pow(bl, onethree);
 			std::complex<number> bl2 = pow(bl1, static_cast<number>(2.0));
 			std::complex<number> A1 = (-sqrt2div3)*static_cast<number>(2)*std::fma(b1,std::fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15),c0d0,static_cast<number>(13),b0c1)) + static_cast<number>(2)*c0*sqrt1;
-			/*
-			std::complex<number> A2 = static_cast<number>(8)*b3*c0*-tmp - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
-				static_cast<number>(116)*b1c1*d0 + static_cast<number>(23)*b0*c[3] - static_cast<number>(99)*b0c0*d1 - static_cast<number>(21)*c2*d0 +\
-				static_cast<number>(27)*d[2] -sqrt1*sqrt2 * (static_cast<number>(8)*b1c1 - static_cast<number>(10)*b0*c0d0 + c2 + static_cast<number>(3)*d1);
-			*/
-			std::complex<number> A2 = static_cast<number>(8)*b3*c0*-tmp - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
-				static_cast<number>(116)*b1c1*d0 + static_cast<number>(23)*b0*c[3] - static_cast<number>(99)*b0c0*d1 - static_cast<number>(21)*c2*d0 +\
-				static_cast<number>(27)*d[2] - sqrt1*sqrt2 *std::fma(static_cast<number>(2)*b0c0,fms(static_cast<number>(4),b0c0,static_cast<number>(5),d0), std::fma(static_cast<number>(3),d1,c2));
+			std::complex<number> A2 = fms(static_cast<number>(2)*b1*d0, fms(b0, d0, static_cast<number>(-58), c1), static_cast<number>(8)*b2,
+				fms(b0c0, tmp, static_cast<number>(-5), c2)) + \
+				fms(b0c0, fms(static_cast<number>(23), c2, static_cast<number>(99), d1), static_cast<number>(-3)*d0, fms(static_cast<number>(9), d1, 
+				static_cast<number>(7),c2)) - sqrt1*sqrt2 *std::fma(static_cast<number>(2)*b0c0,fms(static_cast<number>(4),b0c0,static_cast<number>(5),d0),
+				std::fma(static_cast<number>(3),d1,c2));
 			std::complex<number>  Rbase = sqrt1 * sqrt2div9;
 			std::complex<number> R1, R2;
 			if (o == 0)
@@ -391,7 +390,7 @@ namespace implementations{
 			return roots;
 		}
 
-		/*Действительные корни.
+		/*Комплексные корни.
 		@type Q: TEMPLATE
 		@param Q: Вычисленное значение Q.
 		@type Q3: TEMPLATE
@@ -411,15 +410,20 @@ namespace implementations{
 			number T;
 			number Tin;
 			number sqrtsh;
-			number absQ3 = fabs(Q3);
+			number sqrtabsQ3 = sqrt(fabs(Q3));
 			number sqrtabsQ = sqrt(fabs(Q));
-			if(Q > 0){
-				number phi = acosh(fabs(R)/sqrt(absQ3))*onethree;
+
+			// Q может быть не б/м, но корень может быть еще меньше
+			if(sqrtabsQ3 == 0 || !std::isfinite(sqrtabsQ3)){
+				return {-inp2three, -inp2three, -inp2three};
+			}
+			if(Q > 0 && std::isfinite(Q)){
+				number phi = acosh(fabs(R)/sqrtabsQ3)*onethree;
 				T = sqrtabsQ*cosh(phi);
 				sqrtsh = sqrt3*sqrtabsQ*sinh(phi);
 			}
 			else{
-				number phi = asinh(fabs(R)/sqrt(absQ3))*onethree;
+				number phi = asinh(fabs(R)/sqrtabsQ3)*onethree;
 				T = sqrtabsQ*sinh(phi);
 				sqrtsh = sqrt3*sqrtabsQ*cosh(phi);
 			}
@@ -472,18 +476,17 @@ namespace implementations{
 
 			number b_onethree = b*onethree;
 			auto Q = fms(b_onethree,b_onethree,c,onethree);
-			if(Q == 0){
+			if(Q == 0 || !std::isfinite(Q)){
 				number rs = -b_onethree;
 				roots = {rs, rs, rs};
 				return 3;
 			}
 			else{
 				number R = std::fma(static_cast<number>(0.5), std::fma(-c, b_onethree, d), pow(b_onethree, 3));
-				auto R2 = R*R;
 				auto Q3 = Q*Q*Q;
-				auto S = fms(Q*Q,Q,R,R);
+				auto S = std::fma(-R,R,Q3);
 				
-				if(S==0){
+				if(S==0 || !std::isfinite(S)){
 					std::cout << "S==0\n"; 
 					roots = degenerate(R, b, b_onethree);
 				}
