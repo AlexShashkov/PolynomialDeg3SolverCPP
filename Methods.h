@@ -104,7 +104,6 @@ namespace implementations{
 			number b0 = b[0];
 			number b1 = b[1];
 			number b2 = b[2];
-			number b3 = b[3];
 
 			number c0 = c[0];
 			number c1 = c[1];
@@ -115,14 +114,13 @@ namespace implementations{
 			
 			number tmp = std::fma(-b0,c0,d0);
 
-			number c0d0 = c0*d0;
 			number b0c0 = -tmp + d0;
 			number b0c1 = b0*c1;
 			number b1c1 = b1*c1;
 
 			number t = fms(c2, fms(static_cast<number>(2), std::fma(static_cast<number>(12)*d0, 
 				fms(static_cast<number>(3), d0, static_cast<number>(-11), b2), std::fma(static_cast<number>(8), b[5], c2)),
-				static_cast<number>(66)*b0c0, (tmp+d0)), static_cast<number>(12)*b3*c0, std::fma(static_cast<number>(7),c2,-d1)) + \
+				static_cast<number>(66)*b0c0, (tmp+d0)), static_cast<number>(12)*b[3]*c0, std::fma(static_cast<number>(7),c2,-d1)) + \
 				fms(d[2], fms(static_cast<number>(2)*b0, std::fma(static_cast<number>(72), c0, -b1),static_cast<number>(27),d0),
 				b1c1, d0*static_cast<number>(3)*fms(static_cast<number>(8), b2, static_cast<number>(-97),d0));
 			number partiond0 = std::fma(tmp,fms(static_cast<number>(14)*b0,c1,static_cast<number>(4)*b2,c0),fms(static_cast<number>(14)*b0c1,d0,static_cast<number>(12)*c0,d1))+ std::fma(b1,d1,c[3]);
@@ -138,7 +136,7 @@ namespace implementations{
 			std::complex<number> bl = tmp * sqrt1 * std::fma(static_cast<number>(4)*b0c0,-tmp,static_cast<number>(2)*c2+d1) + sqrt2div9*t;
 			std::complex<number> bl1 = pow(bl, onethree);
 			std::complex<number> bl2 = pow(bl1, static_cast<number>(2.0));
-			std::complex<number> A1 = (-sqrt2div3)*static_cast<number>(2)*std::fma(b1,std::fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15),c0d0,static_cast<number>(13),b0c1)) + static_cast<number>(2)*c0*sqrt1;
+			std::complex<number> A1 = (-sqrt2div3)*static_cast<number>(2)*std::fma(b1,std::fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15), c[0]*d[0],static_cast<number>(13),b0c1)) + static_cast<number>(2)*c0*sqrt1;
 			std::complex<number> A2 = fms(static_cast<number>(2)*b1*d0, fms(b0, d0, static_cast<number>(-58), c1), static_cast<number>(8)*b2,
 				fms(b0c0, tmp, static_cast<number>(-5), c2)) + \
 				fms(b0c0, fms(static_cast<number>(23), c2, static_cast<number>(99), d1), static_cast<number>(-3)*d0, fms(static_cast<number>(9), d1, 
