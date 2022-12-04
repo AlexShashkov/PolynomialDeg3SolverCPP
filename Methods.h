@@ -44,6 +44,11 @@ class Baydoun
 		}
 	}
 
+	inline number fms(number a, number b, number c, number d) {
+    	auto tmp = d * c;
+    	return std::fma(a, b, -tmp) + std::fma(-d, c, tmp);
+	}
+
 	/*Вычисление вспомогательных степеней коэффициентов полинома.
 	@type b: TEMPLATE*
 	@param b: Массив, в котором будут храниться коэффициенты x^2.
@@ -98,15 +103,15 @@ class Baydoun
 		number c0d0 = c0*d0;
 		number b0c0 = -tmp + d0;
 		number b0c1 = b0*c1;
-		number b1c1 = b1*c1*static_cast<number>(4);
+		number b1c1 = b1*c1;
 
 		number t = c2*(static_cast<number>(16)*b[5] + static_cast<number>(72)*d1 + static_cast<number>(264)*b2*d0 - static_cast<number>(66)*b0c0*(tmp+d0) +\
 			static_cast<number>(2)*c2) + b3*c0*(static_cast<number>(12)*d1 - static_cast<number>(84)*c2) - b1 * \
 			c1*d0*(static_cast<number>(24)*b2+static_cast<number>(291)*d0) + d[2]*(static_cast<number>(144)*b0c0 - static_cast<number>(27)*d0 - static_cast<number>(2)*b2);
-		// number partiond0 = static_cast<number>(4)*b2*c0*-tmp + static_cast<number>(14)*b0c1*tmp + b1*d1 - static_cast<number>(12)*c0*d1;
-		number partiond0 = static_cast<number>(4)*b2*c0*-tmp + static_cast<number>(14)*b0c1*(tmp+d0)+ b1*d1 + c[3]- static_cast<number>(12)*c0*d1;
+		// number partiond0 = static_cast<number>(4)*b2*c0*-tmp + static_cast<number>(14)*b0c1*(tmp+d0)+ b1*d1 + c[3]- static_cast<number>(12)*c0*d1;
+		number partiond0 = tmp*fms(static_cast<number>(14)*b0,c1,static_cast<number>(4)*b2,c0)+fms(static_cast<number>(14)*b0c1,d0,static_cast<number>(12)*c0,d1)+ std::fma(b1,d1,c[3]); 
 		std::complex<number> sqrt1;
-		if (o > 0)
+		if (o > THRESHOLD)
 		    sqrt1 = sqrt(o);
 		else
 		    sqrt1 = std::complex<number>(0, 1)*static_cast<number>(sqrt(fabs(o)));
@@ -114,7 +119,7 @@ class Baydoun
 		std::complex<number>  sqrt2div3 = sqrt2*onethree;
 		std::complex<number>  sqrt2div9 = sqrt2div3*onethree;
 
-		std::complex<number>  bl = tmp * sqrt1 * (static_cast<number>(4)*b0c0-tmp+static_cast<number>(2)*c2+d1) + sqrt2div9*t; // ?
+		std::complex<number>  bl = tmp * sqrt1 * std::fma(static_cast<number>(4)*b0c0,-tmp,static_cast<number>(2)*c2+d1) + sqrt2div9*t;
 		std::complex<number>  bl1 = pow(bl, onethree);
 		std::complex<number>  bl2 = pow(bl1, static_cast<number>(2.0));
 		std::complex<number>  A1 = (-sqrt2div3)*(static_cast<number>(2)*b1*(tmp1 + static_cast<number>(2)*d0) - static_cast<number>(26)*b0c1 + static_cast<number>(30)*c0d0) + static_cast<number>(2)*c0*sqrt1;
@@ -175,9 +180,13 @@ class Baydoun
 		number c0 = c[0];
 
 		number tmp1 = std::fma(static_cast<number>(2)*b0,c0,static_cast<number>(-3)*d0);
-		number o = -b[1]*std::fma(static_cast<number>(4)*b0,d0,-c[1])+static_cast<number>(9)*d0*tmp1 - static_cast<number>(4)*c[2];
-		//number o = -static_cast<number>(4)*(b[2]*d0 + c[2]) + b[1]*c[1] + static_cast<number>(18)*b0*c[0]*d0 - static_cast<number>(27)*d[1];
-		number r = static_cast<number>(2)*b[2]*one27 -static_cast<number>(9)*b0*c0*one27 + d0;
+
+
+    	number o = -b[1]*std::fma(static_cast<number>(4)*b0,d0,-c[1]) + fms(static_cast<number>(9)*d0,tmp1, static_cast<number>(4),c[2]);
+		// number o = -b[1]*std::fma(static_cast<number>(4)*b0,d0,-c[1])+static_cast<number>(9)*d0*tmp1 - static_cast<number>(4)*c[2];
+		// number o = -static_cast<number>(4)*(b[2]*d0 + c[2]) + b[1]*c[1] + static_cast<number>(18)*b0*c[0]*d0 - static_cast<number>(27)*d[1];
+		// number r = static_cast<number>(2)*b[2]*one27 -static_cast<number>(9)*b0*c0*one27 + d0;
+		number r = one27*fms(static_cast<number>(2), b[2], static_cast<number>(9), b[0]*c[0]) + d0;
 		number bthree = b0*onethree;
 
 		// std::cout << "_SOLVE o r, one27" << o << " " << r << " " << one27 << "\n";
