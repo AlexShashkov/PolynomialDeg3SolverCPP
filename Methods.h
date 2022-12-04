@@ -34,7 +34,13 @@ namespace implementations{
 	template <typename number>
 	inline number fms(number a, number b, number c, number d) {
 		auto tmp = d * c;
-		return std::fma(a, b, -tmp);//+ std::fma(-d, c, tmp);
+		return std::fma(a, b, -tmp);
+	}
+
+	template <typename number>
+	std::complex<number> fms(std::complex<number> a, std::complex<number> b, std::complex<number> c,std::complex<number> d) {
+		return {fms(a.real(),b.real(),c.real(),d.real())+fms(c.imag(),d.imag(),a.imag(),b.imag()),
+		fms(a.real(),b.imag(),c.real(),d.imag())+fms(b.real(),a.imag(),d.real(),c.imag())};
 	}
 
 	template <typename number>
@@ -117,24 +123,28 @@ namespace implementations{
 			number t = c2*(static_cast<number>(16)*b[5] + static_cast<number>(72)*d1 + static_cast<number>(264)*b2*d0 - static_cast<number>(66)*b0c0*(tmp+d0) +\
 				static_cast<number>(2)*c2) + b3*c0*(static_cast<number>(12)*d1 - static_cast<number>(84)*c2) - b1 * \
 				c1*d0*(static_cast<number>(24)*b2+static_cast<number>(291)*d0) + d[2]*(static_cast<number>(144)*b0c0 - static_cast<number>(27)*d0 - static_cast<number>(2)*b2);
-			// number partiond0 = static_cast<number>(4)*b2*c0*-tmp + static_cast<number>(14)*b0c1*(tmp+d0)+ b1*d1 + c[3]- static_cast<number>(12)*c0*d1;
-			number partiond0 = tmp*fms(static_cast<number>(14)*b0,c1,static_cast<number>(4)*b2,c0)+fms(static_cast<number>(14)*b0c1,d0,static_cast<number>(12)*c0,d1)+ std::fma(b1,d1,c[3]); 
+			number partiond0 = std::fma(tmp,fms(static_cast<number>(14)*b0,c1,static_cast<number>(4)*b2,c0),fms(static_cast<number>(14)*b0c1,d0,static_cast<number>(12)*c0,d1))+ std::fma(b1,d1,c[3]);
 			std::complex<number> sqrt1;
 			if (o > THRESHOLD)
 				sqrt1 = sqrt(o);
 			else
 				sqrt1 = std::complex<number>(0, 1)*static_cast<number>(sqrt(fabs(o)));
 			std::complex<number> sqrt2 = std::complex<number>(0, 1)*sqrt3;
-			std::complex<number>  sqrt2div3 = sqrt2*onethree;
-			std::complex<number>  sqrt2div9 = sqrt2div3*onethree;
+			std::complex<number> sqrt2div3 = sqrt2*onethree;
+			std::complex<number> sqrt2div9 = sqrt2div3*onethree;
 
-			std::complex<number>  bl = tmp * sqrt1 * std::fma(static_cast<number>(4)*b0c0,-tmp,static_cast<number>(2)*c2+d1) + sqrt2div9*t;
-			std::complex<number>  bl1 = pow(bl, onethree);
-			std::complex<number>  bl2 = pow(bl1, static_cast<number>(2.0));
-			std::complex<number>  A1 = (-sqrt2div3)*(static_cast<number>(2)*b1*(tmp1 + static_cast<number>(2)*d0) - static_cast<number>(26)*b0c1 + static_cast<number>(30)*c0d0) + static_cast<number>(2)*c0*sqrt1;
-			std::complex<number>  A2 = static_cast<number>(8)*b3*c0*-tmp - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
+			std::complex<number> bl = tmp * sqrt1 * std::fma(static_cast<number>(4)*b0c0,-tmp,static_cast<number>(2)*c2+d1) + sqrt2div9*t;
+			std::complex<number> bl1 = pow(bl, onethree);
+			std::complex<number> bl2 = pow(bl1, static_cast<number>(2.0));
+			std::complex<number> A1 = (-sqrt2div3)*static_cast<number>(2)*std::fma(b1,std::fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15),c0d0,static_cast<number>(13),b0c1)) + static_cast<number>(2)*c0*sqrt1;
+			/*
+			std::complex<number> A2 = static_cast<number>(8)*b3*c0*-tmp - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
 				static_cast<number>(116)*b1c1*d0 + static_cast<number>(23)*b0*c[3] - static_cast<number>(99)*b0c0*d1 - static_cast<number>(21)*c2*d0 +\
 				static_cast<number>(27)*d[2] -sqrt1*sqrt2 * (static_cast<number>(8)*b1c1 - static_cast<number>(10)*b0*c0d0 + c2 + static_cast<number>(3)*d1);
+			*/
+			std::complex<number> A2 = static_cast<number>(8)*b3*c0*-tmp - static_cast<number>(40)*b2*c2 + static_cast<number>(2)*b2*d1 +\
+				static_cast<number>(116)*b1c1*d0 + static_cast<number>(23)*b0*c[3] - static_cast<number>(99)*b0c0*d1 - static_cast<number>(21)*c2*d0 +\
+				static_cast<number>(27)*d[2] - sqrt1*sqrt2 *std::fma(static_cast<number>(2)*b0c0,fms(static_cast<number>(4),b0c0,static_cast<number>(5),d0), std::fma(static_cast<number>(3),d1,c2));
 			std::complex<number>  Rbase = sqrt1 * sqrt2div9;
 			std::complex<number> R1, R2;
 			if (o == 0)
@@ -152,7 +162,6 @@ namespace implementations{
 			}
 			std::complex<number>  sqrt205=sqrt2*static_cast<number>(0.5);
 			std::complex<number> M[2] = {static_cast<number>(0.5) - sqrt205, static_cast<number>(0.5) + sqrt205};
-			std::complex<number> M2[2] = {static_cast<number>(-0.5) - sqrt205, static_cast<number>(-0.5) + sqrt205};
 
 			std::complex<number>  arg1_1 = A1*bl1;
 			std::complex<number>  arg1_2 = -partiond0*R1;
@@ -161,18 +170,11 @@ namespace implementations{
 			// Вычисляем аргумент комплексного числа
 			number phi1 = argp(arg1_1) - argp(arg1_2);
 			number phi2 = argp(arg2_1) - argp(arg2_2); 
-			std::complex<number>  a1 = (cbrt4ftwo)*(std::cos(phi1)+std::complex<number>(0, std::sin(phi1)));
-			std::complex<number>  a2 = (cbrt4ftwo)*(std::cos(phi2)+std::complex<number>(0, std::sin(phi2)));
-			std::complex<number>  a1R1 = a1*R1;
-			std::complex<number>  a2R2 = a2*R2;
-			std::complex<number>  x1 = -a1R1 + a2R2 - bthree;
-			std::complex<number>  x2 = M[0]*a1R1 + M2[0]*a2R2 - bthree;
-			std::complex<number>  x3 = M[1]*a1R1 + M2[1]*a2R2 - bthree;
-			/*
-			std::complex<number> x1 = fma(-a1,R1,std::fma(a2,R2, - bthree));
-			std::complex<number> x2 = fma(M[0]*a1,R1, std::fma(M2[0]*a2, R2, - bthree));
-			std::complex<number> x3 = fma(M[1]*a1,R1, std::fma(M2[1]*a2, R2, - bthree));
-			*/
+			std::complex<number> a1 = (cbrt4ftwo)*(std::cos(phi1)+std::complex<number>(0, std::sin(phi1)));
+			std::complex<number> a2 = (cbrt4ftwo)*(std::cos(phi2)+std::complex<number>(0, std::sin(phi2)));
+			std::complex<number> x1 = fms(a2,R2,a1,R1) - bthree;
+			std::complex<number> x2 = fms(M[0]*a1,R1,M[1]*a2,R2) - bthree;
+			std::complex<number> x3 = fms(M[1]*a1,R1,M[0]*a2,R2) - bthree;
 			return std::vector<std::complex<number>>{x1, x2, x3};
 		}
 
@@ -195,15 +197,9 @@ namespace implementations{
 
 			number tmp1 = std::fma(static_cast<number>(2)*b0,c0,static_cast<number>(-3)*d0);
 
-
-			number o = -b[1]*std::fma(static_cast<number>(4)*b0,d0,-c[1]) + fms(static_cast<number>(9)*d0,tmp1, static_cast<number>(4),c[2]);
-			// number o = -b[1]*std::fma(static_cast<number>(4)*b0,d0,-c[1])+static_cast<number>(9)*d0*tmp1 - static_cast<number>(4)*c[2];
-			// number o = -static_cast<number>(4)*(b[2]*d0 + c[2]) + b[1]*c[1] + static_cast<number>(18)*b0*c[0]*d0 - static_cast<number>(27)*d[1];
-			// number r = static_cast<number>(2)*b[2]*one27 -static_cast<number>(9)*b0*c0*one27 + d0;
-			number r = one27*fms(static_cast<number>(2), b[2], static_cast<number>(9), b[0]*c[0]) + d0;
+			number o = std::fma(-b[1],std::fma(static_cast<number>(4)*b0,d0,-c[1]),fms(static_cast<number>(9)*d0,tmp1, static_cast<number>(4),c[2]));
+			number r = std::fma(one27,fms(static_cast<number>(2), b[2], static_cast<number>(9), b[0]*c[0]),d0);
 			number bthree = b0*onethree;
-
-			// std::cout << "_SOLVE o r, one27" << o << " " << r << " " << one27 << "\n";
 
 			if(o == 0 && r == 0){
 				roots = std::vector<std::complex<number>>{-bthree, -bthree, -bthree};
@@ -298,7 +294,6 @@ namespace implementations{
 			// x^3, x^2, x, c
 			int *numbers = new int[count];
 			for(int i = 0; i < count; i++){
-				// std::cout << i << "\n";
 				std::vector<std::complex<number>> res;
 				numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
 				roots.push_back(res);
@@ -363,7 +358,6 @@ namespace implementations{
 			roots = {x1, x2};
 			for (auto &r: roots) {
 				// Проверка на нулевые Im
-				// std::cout << std::numeric_limits<number>::epsilon() << "\n";
 				if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
 			}
 			return roots;
@@ -437,7 +431,6 @@ namespace implementations{
 			for (auto &r: roots) {
 				if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
 			}
-			roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
 			return roots;
 		}
 	public:
@@ -491,12 +484,15 @@ namespace implementations{
 				auto S = fms(Q*Q,Q,R,R);
 				
 				if(S==0){
+					std::cout << "S==0\n"; 
 					roots = degenerate(R, b, b_onethree);
 				}
 				else if(S > 0){
+					std::cout << "S>0\n"; 
 					roots = usual(Q, Q3, R, b, b_onethree);
 				}
 				else{
+					std::cout << "S<0\n"; 
 					roots = complex(Q, Q3, R, b, b_onethree);
 				}
 				return roots.size();
