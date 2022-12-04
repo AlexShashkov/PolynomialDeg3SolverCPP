@@ -1,8 +1,6 @@
 #ifndef METHODS_H
 #define METHODS_H
 
-#define THRESHOLD 1e-5
-
 #include <cmath>
 #include <numbers>
 #include <vector>
@@ -58,6 +56,7 @@ namespace implementations{
 		number one27;
 		number sqrt3;
 		number cbrt4ftwo;
+		number THRESHOLD;
 
 		/*Вычисление вспомогательных степеней коэффициентов полинома.
 		@type b: TEMPLATE*
@@ -217,7 +216,7 @@ namespace implementations{
 		}
 
 	public:
-		Baydoun(){
+		Baydoun(number trsh = 1e-5){
 			long double _onethree = 1.0L/3.0L;
 			long double _one27 = _onethree*_onethree*_onethree;
 			long double _sqrt3 = std::sqrt(3L);
@@ -227,6 +226,7 @@ namespace implementations{
 			one27 = static_cast<number>(_one27);
 			sqrt3 = static_cast<number>(_sqrt3);
 			cbrt4ftwo = static_cast<number>(_cbrt4ftwo);
+			THRESHOLD=trsh;
 		}
 
 		/*Функтор для решения уравнения методом Baydoun.
@@ -355,11 +355,10 @@ namespace implementations{
 		@rtype: vector<complex<TEMPLATE>>
 		@returns: Вектор, хранящий корни уравнения.
 		*/
-		std::vector<std::complex<number>> degenerate(number R, number b){
+		std::vector<std::complex<number>> degenerate(number R, number b, number inp2three){
 			std::vector<std::complex<number>> roots;
-			auto inp2three = b*onethree;
 			number _x = cbrt(R);
-			auto x1 = -static_cast<number>(2)*_x-inp2three;
+			auto x1 = -std::fma(static_cast<number>(2),_x,inp2three);
 			auto x2 = _x-inp2three;
 			roots = {x1, x2};
 			for (auto &r: roots) {
@@ -382,16 +381,15 @@ namespace implementations{
 		@rtype: vector<complex<TEMPLATE>>
 		@returns: Вектор, хранящий корни уравнения.
 		*/
-		std::vector<std::complex<number>> usual(number Q, number Q3, number R, number b){
+		std::vector<std::complex<number>> usual(number Q, number Q3, number R, number b, number inp2three){
 			std::vector<std::complex<number>> roots;
 			number x1,x2,x3 = 0;
 			number pi2div3 = b*pi2div3;
-			number inp2three = b*onethree;
 			number phi = acos(R/sqrt(Q3))*onethree;
 			number sqrtQ = static_cast<number>(-2)*sqrt(Q);
-			x1 = sqrtQ*cos(phi)-inp2three;
-			x2 = sqrtQ*cos(phi+pi2div3)-inp2three;
-			x3 = sqrtQ*cos(phi-pi2div3)-inp2three;
+			x1 = std::fma(sqrtQ,cos(phi),-inp2three);
+			x2 = std::fma(sqrtQ,cos(phi+pi2div3),-inp2three);
+			x3 = std::fma(sqrtQ,cos(phi-pi2div3),-inp2three);
 			roots = {x1, x2, x3};
 			for (auto &r: roots) {
 				if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
@@ -411,11 +409,10 @@ namespace implementations{
 		@rtype: vector<complex<TEMPLATE>>
 		@returns: Вектор, хранящий корни уравнения.
 		*/
-		std::vector<std::complex<number>> complex(number Q, number Q3, number R, number b){
+		std::vector<std::complex<number>> complex(number Q, number Q3, number R, number b, number inp2three){
 			std::vector<std::complex<number>> roots;
 			number x1 = 0;
 			std::complex<number>  x2, x3 = 0;
-			number inp2three = b*onethree;
 			number _phi= 0;
 			number T;
 			number Tin;
@@ -433,13 +430,11 @@ namespace implementations{
 				sqrtsh = sqrt3*sqrtabsQ*cosh(phi);
 			}
 			Tin = T - inp2three;
-			x1 = static_cast<number>(-2)*T-inp2three;
+			x1 = -std::fma(static_cast<number>(2),T,inp2three);
 			x2 = std::complex<number>(Tin,sqrtsh);
 			x3 = std::complex<number>(Tin,-sqrtsh);
 			roots = {x1, x2, x3};
 			for (auto &r: roots) {
-				// Проверка на нулевые Im
-				// std::cout << std::numeric_limits<number>::epsilon() << "\n";
 				if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
 			}
 			roots.erase(std::unique( roots.begin(), roots.end() ), roots.end());
@@ -456,20 +451,20 @@ namespace implementations{
 			onethree = static_cast<number>(_onethree);
 		}
 
-			/*Функтор для решения уравнения методом Baydoun.
-			@type a: TEMPLATE
-			@param a: Коэффициент x^3.
-			@type b: TEMPLATE
-			@param b: Коэффициент x^2.
-			@type c: TEMPLATE
-			@param c: Коэффициент x.
-			@type d: TEMPLATE
-			@param d: Коэффициент C.
-			@type roots: vector<complex<TEMPLATE>>&
-			@param root: Вектор, который хранит корни уравнения.
-			@rtype: int
-			@returns: Количество корней.
-			*/
+		/*Функтор для решения уравнения методом Baydoun.
+		@type a: TEMPLATE
+		@param a: Коэффициент x^3.
+		@type b: TEMPLATE
+		@param b: Коэффициент x^2.
+		@type c: TEMPLATE
+		@param c: Коэффициент x.
+		@type d: TEMPLATE
+		@param d: Коэффициент C.
+		@type roots: vector<complex<TEMPLATE>>&
+		@param root: Вектор, который хранит корни уравнения.
+		@rtype: int
+		@returns: Количество корней.
+		*/
 		int operator()(number a, number b, number c, number d,
 				std::vector<std::complex<number>> &roots){
 			// x^3, x^2, x, c
@@ -482,29 +477,27 @@ namespace implementations{
 			else
 				throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
 
-			auto Q = b*b*onethree*onethree -c*onethree;
-			// std::cout << "b " << b << " b^2 " << b*b << " c " << c << "\n";
-			// std::cout << "onethree " << onethree << "\n";
-			// std::cout << Q << ":)\n";
+			number b_onethree = b*onethree;
+			auto Q = fms(b_onethree,b_onethree,c,onethree);
 			if(Q == 0){
-				number rs = -b/static_cast<number>(3);
+				number rs = -b_onethree;
 				roots = {rs, rs, rs};
 				return 3;
 			}
 			else{
-				number R = pow(b, 3)*onethree*onethree*onethree-c*b/static_cast<number>(6)+d*static_cast<number>(0.5);
+				number R = std::fma(static_cast<number>(0.5), std::fma(-c, b_onethree, d), pow(b_onethree, 3));
 				auto R2 = R*R;
 				auto Q3 = Q*Q*Q;
-				auto S = Q3-R2;
+				auto S = fms(Q*Q,Q,R,R);
 				
 				if(S==0){
-					roots = degenerate(R, b);
+					roots = degenerate(R, b, b_onethree);
 				}
 				else if(S > 0){
-					roots = usual(Q, Q3, R, b);
+					roots = usual(Q, Q3, R, b, b_onethree);
 				}
 				else{
-					roots = complex(Q, Q3, R, b);
+					roots = complex(Q, Q3, R, b, b_onethree);
 				}
 				return roots.size();
 			}
@@ -525,16 +518,16 @@ namespace implementations{
 				return operator()(inp[0], inp[1], inp[2], inp[3], roots);
 		}
 
-			/*Функтор для решения уравнений методом Виета.
-			@type poly: TEMPLATE**
-			@param a: Динамический массив размером (coun, 4), где count - количество полиномов.
-			@type count: int
-			@param count: Количество полиномов.
-			@type roots: vector<vector<complex<TEMPLATE>>>&
-			@param root: Вектор, который хранит корни уравнения.
-			@rtype: int*
-			@returns: Количество корней в каждом полиноме.
-			*/
+		/*Функтор для решения уравнений методом Виета.
+		@type poly: TEMPLATE**
+		@param a: Динамический массив размером (coun, 4), где count - количество полиномов.
+		@type count: int
+		@param count: Количество полиномов.
+		@type roots: vector<vector<complex<TEMPLATE>>>&
+		@param root: Вектор, который хранит корни уравнения.
+		@rtype: int*
+		@returns: Количество корней в каждом полиноме.
+		*/
 		int* operator()(number **poly, int count,
 				std::vector<std::vector<std::complex<number>>> &roots){
 			// x^3, x^2, x, c
@@ -542,7 +535,6 @@ namespace implementations{
 
 			std::vector<std::complex<number>> res;
 			for(int i = 0; i < count; i++){
-				// std::cout << i << "\n";
 				numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
 				roots.push_back(res);
 				res.clear();
@@ -550,16 +542,16 @@ namespace implementations{
 			return numbers;
 		}
 
-			/*Функтор для решения уравнений методом Виета.
-			@type poly: TEMPLATE[][4]
-			@param a: Массив размером (coun, 4), где count - количество полиномов.
-			@type count: int
-			@param count: Количество полиномов.
-			@type roots: vector<vector<complex<TEMPLATE>>>&
-			@param root: Вектор, который хранит корни уравнения.
-			@rtype: int*
-			@returns: Количество корней в каждом полиноме.
-			*/
+		/*Функтор для решения уравнений методом Виета.
+		@type poly: TEMPLATE[][4]
+		@param a: Массив размером (coun, 4), где count - количество полиномов.
+		@type count: int
+		@param count: Количество полиномов.
+		@type roots: vector<vector<complex<TEMPLATE>>>&
+		@param root: Вектор, который хранит корни уравнения.
+		@rtype: int*
+		@returns: Количество корней в каждом полиноме.
+		*/
 		int* operator()(number poly[][4], int count,
 				std::vector<std::vector<std::complex<number>>> &roots){
 			// x^3, x^2, x, c
