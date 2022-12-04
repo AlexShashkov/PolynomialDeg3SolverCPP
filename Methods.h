@@ -158,7 +158,7 @@ namespace implementations{
 			std::complex<number> bl = tmp * sqrt1 * std::fma(static_cast<number>(4)*b0c0,-tmp,static_cast<number>(2)*c2+d1) + sqrt2div9*t;
 			std::complex<number> bl1 = pow(bl, onethree);
 			std::complex<number> bl2 = pow(bl1, static_cast<number>(2.0));
-			std::complex<number> A1 = (-sqrt2div3)*static_cast<number>(2)*std::fma(b1,std::fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15), c[0]*d[0],static_cast<number>(13),b0c1)) + static_cast<number>(2)*c0*sqrt1;
+			std::complex<number> A1 = (-sqrt2div3)*static_cast<number>(2)*std::fma(b1,std::fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15), c0*d0, static_cast<number>(13),b0c1)) + static_cast<number>(2)*c0*sqrt1;
 			std::complex<number> A2 = fms(static_cast<number>(2)*b1*d0, fms(b0, d0, static_cast<number>(-58), c1), static_cast<number>(8)*b2,
 				fms(b0c0, tmp, static_cast<number>(-5), c2)) + \
 				fms(b0c0, fms(static_cast<number>(23), c2, static_cast<number>(99), d1), static_cast<number>(-3)*d0, fms(static_cast<number>(9), d1, 
@@ -507,15 +507,12 @@ namespace implementations{
 				auto S = std::fma(-R,R,Q3);
 				
 				if(S==0 || !std::isfinite(S)){
-					std::cout << "S==0\n"; 
 					roots = degenerate(R, b, b_onethree);
 				}
 				else if(S > 0){
-					std::cout << "S>0\n"; 
 					roots = usual(Q, Q3, R, b, b_onethree);
 				}
 				else{
-					std::cout << "S<0\n"; 
 					roots = complex(Q, Q3, R, b, b_onethree);
 				}
 				return roots.size();
