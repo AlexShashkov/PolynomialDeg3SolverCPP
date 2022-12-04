@@ -2,6 +2,7 @@
 #include "Generate.h"
 
 #define number float
+using namespace implementations;
 
 int main(){
     std::setprecision(30);

@@ -3,6 +3,7 @@
 #include "Methods.h"
 
 #define number float
+using namespace implementations;
 
 number test_method(std::vector<number> &roots, std::vector<number> &real_roots, std::string methodname){
     number max_absolute_error, max_relative_error;
