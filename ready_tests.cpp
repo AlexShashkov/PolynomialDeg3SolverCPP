@@ -66,9 +66,18 @@ int main(int argc,char* argv[]){
     std::vector<number> deviations_rel_B;
     std::vector<number> deviations_rel_V;
 
+    std::vector<std::vector<number>> coeffs_store;
+    std::vector<std::vector<number>> roots_store;
+    std::vector<std::vector<number>> broots_store;
+    std::vector<std::vector<number>> vroots_store;
+
     for(int i = 0; i < count; i++){
         std::vector<number> roots(3), coefficients(4);
         generate_polynomial<number>(3, 0, 3, 0, 1e-5, -1, 1, roots, coefficients);
+        // coefficients = { -0.921196f, 2.84025f, -2.91903f, 1.0f};
+        // roots = {0.973013, 0.973021, 0.972996};
+        coeffs_store.push_back(coefficients);
+        roots_store.push_back(roots);
         std::cout << "Coefficients:\n";
         std::cout << "x^3 + (" << coefficients[2] << ")x^2 + (" << coefficients[1] <<
             ")x + (" << coefficients[0] << ") = 0\n";
@@ -84,6 +93,7 @@ int main(int argc,char* argv[]){
         std::for_each(b_roots.begin(), b_roots.end(), [count_as_real, &b_roots_real](std::complex<number> x){
             if(x.imag() <= count_as_real) b_roots_real.push_back(x.real());
         });
+        broots_store.push_back(b_roots_real);
         std::cout << "Baydoun. Found " << b_roots_real.size() << " roots.\n";
         for (auto &root : b_roots_real){
             std::cout << root << "\n";
@@ -95,6 +105,7 @@ int main(int argc,char* argv[]){
         std::for_each(v_roots.begin(), v_roots.end(), [count_as_real, &v_roots_real](std::complex<number> x){
             if(x.imag() <= count_as_real) v_roots_real.push_back(x.real());
         });
+        vroots_store.push_back(v_roots_real);
         std::cout << "Vieta. Found " << v_roots_real.size() << " roots.\n";
         for (auto &root : v_roots_real){
             std::cout << root << "\n";
@@ -102,20 +113,65 @@ int main(int argc,char* argv[]){
         
         auto [max_abs_B, max_rel_B] = test_method(b_roots_real, roots, "Baydoun");
         auto [max_abs_V, max_rel_V] = test_method(v_roots_real, roots, "Vieta");
-        if(max_abs_B > allowed_deviation) deviations_abs_B.push_back(max_abs_B);
-        if(max_abs_V > allowed_deviation) deviations_abs_V.push_back(max_abs_V);
-        if(max_rel_B > allowed_deviation) deviations_rel_B.push_back(max_rel_B);
-        if(max_rel_V > allowed_deviation) deviations_rel_V.push_back(max_rel_V);
+        // if(max_abs_B > allowed_deviation) 
+        deviations_abs_B.push_back(max_abs_B);
+        // if(max_abs_V > allowed_deviation)
+        deviations_abs_V.push_back(max_abs_V);
+        // if(max_rel_B > allowed_deviation)
+        deviations_rel_B.push_back(max_rel_B);
+        // if(max_rel_V > allowed_deviation)
+        deviations_rel_V.push_back(max_rel_V);
         std::cout << "\n==================================================\n";
     }
 
-    auto _max_abs_B = *std::max_element(deviations_abs_B.begin(), deviations_abs_B.end());
-    auto _max_abs_V = *std::max_element(deviations_abs_V.begin(), deviations_abs_V.end());
-    auto _max_rel_B = *std::max_element(deviations_rel_B.begin(), deviations_rel_B.end());
-    auto _max_rel_V = *std::max_element(deviations_rel_V.begin(), deviations_rel_V.end());
+    int _max_abs_B = std::distance(deviations_abs_B.begin(), std::max_element(deviations_abs_B.begin(), deviations_abs_B.end()));
+    int _max_abs_V = std::distance(deviations_abs_V.begin(), std::max_element(deviations_abs_V.begin(), deviations_abs_V.end()));
+    int _max_rel_B = std::distance(deviations_rel_B.begin(), std::max_element(deviations_rel_B.begin(), deviations_rel_B.end()));
+    int _max_rel_V = std::distance(deviations_rel_V.begin(), std::max_element(deviations_rel_V.begin(), deviations_rel_V.end()));
 
-    std::cout << "Biggest absolute deviation in Baydoun: " << _max_abs_B << "\n";
-    std::cout << "Biggest relative deviation in Baydoun: " << _max_abs_V << "\n";
-    std::cout << "Biggest absolute deviation in Vieta: "   << _max_rel_B << "\n";
-    std::cout << "Biggest relative deviation in Vieta: "   << _max_rel_V << "\n";
+    std::cout << "Biggest absolute deviation in Baydoun: " << deviations_abs_B[_max_abs_B] << "\nCoefficients:";
+    std::cout << "x^3 + (" << coeffs_store[_max_abs_B][2] << ")x^2 + (" << coeffs_store[_max_abs_B][1] <<
+            ")x + (" << coeffs_store[_max_abs_B][0] << ") = 0\n";
+    std::cout << "True roots: ";
+    for (auto &root : roots_store[_max_abs_B]){
+        std::cout << "(x" << ((root > 0) ? "-" : "+") << fabs(root) << ")";
+    }
+    std::cout << "\nFound roots: ";
+    for (auto &root : broots_store[_max_abs_B]){
+        std::cout << "(x" << ((root > 0) ? "-" : "+") << fabs(root) << ")";
+    }
+    std::cout << "\nBiggest relative deviation in Baydoun: " << deviations_abs_V[_max_rel_B] << "\n";
+    std::cout << "x^3 + (" << coeffs_store[_max_rel_B][2] << ")x^2 + (" << coeffs_store[_max_rel_B][1] <<
+            ")x + (" << coeffs_store[_max_rel_B][0] << ") = 0\n";
+    std::cout << "True roots: ";
+    for (auto &root : roots_store[_max_rel_B]){
+        std::cout << "(x" << ((root > 0) ? "-" : "+") << fabs(root) << ")";
+    }
+    std::cout << "\nFound roots: ";
+    for (auto &root : broots_store[_max_rel_B]){
+        std::cout << "(x" << ((root > 0) ? "-" : "+") << fabs(root) << ")";
+    }
+    std::cout << "\nBiggest absolute deviation in Vieta: "   << deviations_rel_B[_max_abs_V] << "\n";
+    std::cout << "x^3 + (" << coeffs_store[_max_abs_V][2] << ")x^2 + (" << coeffs_store[_max_abs_V][1] <<
+            ")x + (" << coeffs_store[_max_abs_V][0] << ") = 0\n";
+    std::cout << "True roots: ";
+    for (auto &root : roots_store[_max_abs_V]){
+        std::cout << "(x" << ((root > 0) ? "-" : "+") << fabs(root) << ")";
+    }
+    std::cout << "\nFound roots: ";
+    for (auto &root : vroots_store[_max_abs_V]){
+        std::cout << "(x" << ((root > 0) ? "-" : "+") << fabs(root) << ")";
+    }
+    std::cout << "\nBiggest relative deviation in Vieta: "   << deviations_rel_V[_max_rel_V] << "\n";
+    std::cout << "x^3 + (" << coeffs_store[_max_rel_V][2] << ")x^2 + (" << coeffs_store[_max_rel_V][1] <<
+            ")x + (" << coeffs_store[_max_rel_V][0] << ") = 0\n";
+    std::cout << "True roots: ";
+    for (auto &root : roots_store[_max_rel_V]){
+        std::cout << "(x" << ((root > 0) ? "-" : "+") << fabs(root) << ")";
+    }
+    std::cout << "\nFound roots: ";
+    for (auto &root : vroots_store[_max_rel_V]){
+        std::cout << "(x" << ((root > 0) ? "-" : "+") << fabs(root) << ")";
+    }
+    std::cout << "\n";
 }

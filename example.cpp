@@ -11,13 +11,13 @@ int main(){
     auto SolverV = Vieta<number>();
     std::vector<std::complex<number>> roots;
     // x^3 + (0.485677)x^2 + (0.0786274)x + (0.00424306) = 0
-    int roots_num = SolverB(1.0f, 0.08154f, 0.00221625f, 2.00793e-05f, roots);
+    int roots_num = SolverB(1.0f, -9.72636e-06f, -8.28118e-11f, 5.81689e-16f, roots);
     std::cout << "Baydoun. Найдено " << roots_num << " корня.\n";
     for (auto &root : roots){
         std::cout << root << "\n";
     }
     
-    roots_num = SolverV(1.0f, 0.08154f, 0.00221625f, 2.00793e-05f, roots);
+    roots_num = SolverV(1.0f, -9.72636e-06f, -8.28118e-11f, 5.81689e-16f, roots);
     std::cout << "Vieta. Найдено " << roots_num << " корня.\n";
     for (auto &root : roots){
         std::cout << root << "\n";

@@ -397,7 +397,6 @@ namespace implementations{
 		std::vector<std::complex<number>> usual(number Q, number Q3, number R, number b, number inp2three){
 			std::vector<std::complex<number>> roots;
 			number x1,x2,x3 = 0;
-			number pi2div3 = b*pi2div3;
 			number phi = acos(R/sqrt(Q3))*onethree;
 			number sqrtQ = static_cast<number>(-2)*sqrt(Q);
 			x1 = std::fma(sqrtQ,cos(phi),-inp2three);
@@ -491,8 +490,7 @@ namespace implementations{
 				d /= a;
 				a = 1;
 			}
-			else
-				throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
+			else throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
 
 			number b_onethree = b*onethree;
 			auto Q = fms(b_onethree,b_onethree,c,onethree);
@@ -505,7 +503,6 @@ namespace implementations{
 				number R = std::fma(static_cast<number>(0.5), std::fma(-c, b_onethree, d), pow(b_onethree, 3));
 				auto Q3 = Q*Q*Q;
 				auto S = std::fma(-R,R,Q3);
-				
 				if(S==0 || !std::isfinite(S)){
 					roots = degenerate(R, b, b_onethree);
 				}
