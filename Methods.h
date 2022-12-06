@@ -436,7 +436,7 @@ namespace implementations{
 			if(sqrtabsQ3 == 0 || !std::isfinite(sqrtabsQ3)){
 				return {-inp2three, -inp2three, -inp2three};
 			}
-			if(Q > 0 && std::isfinite(Q)){
+			if(Q > 0){
 				number phi = acosh(fabs(R)/sqrtabsQ3)*onethree;
 				T = sqrtabsQ*cosh(phi);
 				sqrtsh = sqrt3*sqrtabsQ*sinh(phi);

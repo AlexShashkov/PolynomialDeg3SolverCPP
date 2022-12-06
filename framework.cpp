@@ -282,7 +282,7 @@ int main(void)
 {
 // parameter section //////////////////////////////////////////////////////////////////////////////
 unsigned P=3; // max power to test (min is zero)
-unsigned long long N_tests=1000; // 100000000LLU; // total number of tests
+unsigned long long N_tests=100000; // 100000000LLU; // total number of tests
 unsigned N_test_max_to_verbose_output=10; // maximal number of tests for which extended-verbosity output is produced
   // for every polynomial test
 unsigned N_pairs_of_complex_roots=0; // how many pairs of complex conjugate roots to introduce in each test
@@ -433,6 +433,7 @@ if (test_for_precision) // check correctness
     << "ae_all_tests_worst=" << ae_all_tests_worst
     << ", N_roots_gt_all_tests_ae_worst=" << N_roots_gt_all_tests_ae_worst
     << ", N_roots_found_all_tests_ae_worst=" << N_roots_found_all_tests_ae_worst << std::endl;
+  /*
   for (i=0; i<N_roots_gt_all_tests_ae_worst; ++i) std::cout << "r_gt_ae[" << i << "]="
     << std::setprecision(std::numeric_limits<fp_t>::digits10 + 3) << roots_gt_all_tests_ae_worst[i]
     << (i<N_roots_gt_all_tests_ae_worst-1 ? ", " : "\n");
@@ -441,11 +442,13 @@ if (test_for_precision) // check correctness
     << (i<N_roots_found_all_tests_ae_worst-1 ? ", " : "\n");
   for (i=0; i<=P; ++i) std::cout << std::setprecision(std::numeric_limits<fp_t>::digits10 + 1)
     << "c_ae[" << i << "]=" << coefficients_all_tests_ae_worst[i] << (i<P ? ", " : "\n");
+  */
 
   std::cout << std::endl << "--------------- worst case: relative error: ----------------" << std::endl
     << "re_all_tests_worst=" << re_all_tests_worst
     << ", N_roots_gt_all_tests_re_worst=" << N_roots_gt_all_tests_re_worst
     << ", N_roots_found_all_tests_re_worst=" << N_roots_found_all_tests_re_worst << std::endl;
+  /*
   for (i=0; i<N_roots_gt_all_tests_re_worst; ++i) std::cout << "r_gt_re[" << i << "]="
     << std::setprecision(std::numeric_limits<fp_t>::digits10 + 3) << roots_gt_all_tests_re_worst[i]
     << (i<N_roots_gt_all_tests_re_worst ? ", " : "\n");
@@ -454,6 +457,7 @@ if (test_for_precision) // check correctness
     << (i<N_roots_found_all_tests_re_worst ? ", " : "\n");
   for (i=0; i<=P; ++i) std::cout << std::setprecision(std::numeric_limits<fp_t>::digits10 + 1)
     << "c_re[" << i << "]=" << coefficients_all_tests_re_worst[i] << (i<P ? ", " : "\n");
+  */
 
   std::cout << std::setprecision(fp_precision_original); // restore default precision
   } // if (test_for_precision)
