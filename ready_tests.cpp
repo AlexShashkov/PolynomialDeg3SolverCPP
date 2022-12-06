@@ -74,8 +74,10 @@ int main(int argc,char* argv[]){
     for(int i = 0; i < count; i++){
         std::vector<number> roots(3), coefficients(4);
         generate_polynomial<number>(3, 0, 3, 0, 1e-5, -1, 1, roots, coefficients);
-        // coefficients = { -0.921196f, 2.84025f, -2.91903f, 1.0f};
-        // roots = {0.973013, 0.973021, 0.972996};
+        // Coefficients:x^3 + (-2.90517)x^2 + (2.81333)x + (-0.908133) = 0
+        // True roots: (x-0.968389)(x-0.96839)(x-0.968388)
+        // coefficients = { -0.908133f, 2.81333f, -2.90517f, 1.0f};
+        // roots = {0.968388, 0.96839, 0.968389};
         coeffs_store.push_back(coefficients);
         roots_store.push_back(roots);
         std::cout << "Coefficients:\n";

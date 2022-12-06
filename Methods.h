@@ -26,7 +26,7 @@ namespace implementations{
 		if(x > 0) return std::arg(inp);
 		else{
 			number _pi = y < 0 ? -_PI: _PI;
-			if(x == 0) return -_pi;
+			if(x == 0) return _pi/static_cast<number>(2);
 			return std::arg(inp) + _pi;
 		}
 	}
@@ -155,7 +155,7 @@ namespace implementations{
 			std::complex<number> sqrt2div3 = sqrt2*onethree;
 			std::complex<number> sqrt2div9 = sqrt2div3*onethree;
 
-			std::complex<number> bl = tmp * sqrt1 * std::fma(static_cast<number>(4)*b0c0,-tmp,static_cast<number>(2)*c2+d1) + sqrt2div9*t;
+			std::complex<number> bl = tmp * sqrt1 * std::fma(static_cast<number>(4)*b0c0,-tmp,std::fma(static_cast<number>(2),c2,d1)) + sqrt2div9*t;
 			std::complex<number> bl1 = pow(bl, onethree);
 			std::complex<number> bl2 = pow(bl1, static_cast<number>(2.0));
 			std::complex<number> A1 = (-sqrt2div3)*static_cast<number>(2)*std::fma(b1,std::fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15), c0*d0, static_cast<number>(13),b0c1)) + static_cast<number>(2)*c0*sqrt1;
