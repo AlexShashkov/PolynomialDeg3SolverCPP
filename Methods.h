@@ -12,7 +12,7 @@
 using namespace std::complex_literals;
 
 namespace implementations{
-	/*Аргумент комплексного числа
+	/*Аргумент комплексного числа. std::arg охватывает не все случаи
 	@type inp: complex<TEMPLATE>
 	@param inp: Комплексное число.
 	@rtype: TEMPLATE
@@ -26,12 +26,11 @@ namespace implementations{
 		if(x > 0) return std::arg(inp);
 		else{
 			number _pi = y < 0 ? -_PI: _PI;
-			if(x == 0) return _pi/static_cast<number>(2);
-			return std::arg(inp) + _pi;
+			return x == 0 ? _pi/static_cast<number>(2) : std::arg(inp) + _pi;
 		}
 	}
 
-	/*FMS
+	/*Fused multiply-substract
 	@type a: TEMPLATE
 	@type b: TEMPLATE
 	@type c: TEMPLATE
@@ -40,11 +39,10 @@ namespace implementations{
 	*/
 	template <typename number>
 	number fms(number a, number b, number c, number d) {
-		auto tmp = d * c;
-		return std::fma(a, b, -tmp);
+		return std::fma(a, b, -d*c);
 	}
 
-	/*FMS
+	/*Fused multiply-substract for complex numbers
 	@type a: complex<TEMPLATE>
 	@type b: complex<TEMPLATE>
 	@type c: complex<TEMPLATE>
@@ -57,7 +55,7 @@ namespace implementations{
 		fms(a.real(),b.imag(),c.real(),d.imag())+fms(b.real(),a.imag(),d.real(),c.imag())};
 	}
 
-	/*fused multiply-add for complex numbers
+	/*Fused multiply-add for complex numbers
 	@type a: complex<TEMPLATE>
 	@type b: complex<TEMPLATE>
 	@type c: complex<TEMPLATE>
@@ -98,14 +96,21 @@ namespace implementations{
 			number b0 = b[0];
 			number c0 = c[0];
 			number d0 = d[0];
+
+			number _b = b0;
+			number _c = c0;
+			number _d = d0;
 			for (int i = 1; i < 6; i++){
-				b[i] = b[i-1]*b0;
+				_b *= b0;
+				b[i] = _b;
 			}
 			for (int i = 1; i < 4; i++){
-				c[i] = c[i-1]*c0;
+				_c *= c0;
+				c[i] = _c;
 			}
 			for (int i = 1; i < 3; i++){
-				d[i] = d[i-1]*d0;
+				_d *= d0;
+				d[i] = _d;
 			}
 		}
 
@@ -147,17 +152,14 @@ namespace implementations{
 				b1c1, d0*static_cast<number>(3)*fms(static_cast<number>(8), b2, static_cast<number>(-97),d0));
 			number partiond0 = std::fma(tmp,fms(static_cast<number>(14)*b0,c1,static_cast<number>(4)*b2,c0),fms(static_cast<number>(14)*b0c1,d0,static_cast<number>(12)*c0,d1))+ std::fma(b1,d1,c[3]);
 			std::complex<number> sqrt1;
-			if (o > THRESHOLD)
-				sqrt1 = sqrt(o);
-			else
-				sqrt1 = std::complex<number>(0, 1)*static_cast<number>(sqrt(fabs(o)));
+			sqrt1 = o > THRESHOLD ? sqrt(o) : std::complex<number>(0, 1)*static_cast<number>(sqrt(fabs(o)));
 			std::complex<number> sqrt2 = std::complex<number>(0, 1)*sqrt3;
 			std::complex<number> sqrt2div3 = sqrt2*onethree;
 			std::complex<number> sqrt2div9 = sqrt2div3*onethree;
 
 			std::complex<number> bl = tmp * sqrt1 * std::fma(static_cast<number>(4)*b0c0,-tmp,std::fma(static_cast<number>(2),c2,d1)) + sqrt2div9*t;
 			std::complex<number> bl1 = pow(bl, onethree);
-			std::complex<number> bl2 = pow(bl1, static_cast<number>(2.0));
+			std::complex<number> bl2 = pow(bl1, static_cast<number>(2));
 			std::complex<number> A1 = (-sqrt2div3)*static_cast<number>(2)*std::fma(b1,std::fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15), c0*d0, static_cast<number>(13),b0c1)) + static_cast<number>(2)*c0*sqrt1;
 			std::complex<number> A2 = fms(static_cast<number>(2)*b1*d0, fms(b0, d0, static_cast<number>(-58), c1), static_cast<number>(8)*b2,
 				fms(b0c0, tmp, static_cast<number>(-5), c2)) + \
@@ -231,11 +233,15 @@ namespace implementations{
 		}
 
 	public:
-		Baydoun(number trsh = 1e-5){
+		/*Конструктор
+		@type trsh: TEMPLATE
+		@param trsh: Пороговое значение для переменной o.
+		*/
+		Baydoun(number trsh){
 			long double _onethree = 1.0L/3.0L;
 			long double _one27 = _onethree*_onethree*_onethree;
 			long double _sqrt3 = std::sqrt(3L);
-			long double _cbrt4ftwo = pow(4L,_onethree)*static_cast<number>(0.5);
+			long double _cbrt4ftwo = pow(4L, _onethree)*static_cast<number>(0.5);
 
 			onethree = static_cast<number>(_onethree);
 			one27 = static_cast<number>(_one27);
@@ -267,8 +273,7 @@ namespace implementations{
 				d /= a;
 				a = 1;
 			}
-			else
-				throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
+			else throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
 
 			number *_b = new number[6];
 			number *_c = new number[4];
@@ -288,14 +293,15 @@ namespace implementations{
 		@param a: Коэффициенты.
 		@type roots: vector<complex<TEMPLATE>>&
 		@param root: Вектор, который хранит корни уравнения.
+		@type reverse: bool
+		@param reverse: Необходимо ли рассматривать коэффициенты в обратном порядке
 		@rtype: int
 		@returns: Количество корней.
 		*/
 		int operator()(std::vector<number> &inp, std::vector<std::complex<number>> &roots, bool reverse=false){
-			if(reverse)
-				return operator()(inp[3], inp[2], inp[1], inp[0], roots);
-			else
-				return operator()(inp[0], inp[1], inp[2], inp[3], roots);
+			return reverse ?
+				operator()(inp[3], inp[2], inp[1], inp[0], roots):
+				operator()(inp[0], inp[1], inp[2], inp[3], roots);
 		}
 
 		/*Функтор для решения уравнений методом Baydoun.
@@ -521,14 +527,15 @@ namespace implementations{
 		@param a: Коэффициенты.
 		@type roots: vector<complex<TEMPLATE>>&
 		@param root: Вектор, который хранит корни уравнения.
+		@type reverse: bool
+		@param reverse: Необходимо ли рассматривать коэффициенты в обратном порядке
 		@rtype: int
 		@returns: Количество корней.
 		*/
 		int operator()(std::vector<number> &inp, std::vector<std::complex<number>> &roots, bool reverse=false){
-			if(reverse)
-				return operator()(inp[3], inp[2], inp[1], inp[0], roots);
-			else
-				return operator()(inp[0], inp[1], inp[2], inp[3], roots);
+			return reverse ?
+				operator()(inp[3], inp[2], inp[1], inp[0], roots):
+				operator()(inp[0], inp[1], inp[2], inp[3], roots);
 		}
 
 		/*Функтор для решения уравнений методом Виета.

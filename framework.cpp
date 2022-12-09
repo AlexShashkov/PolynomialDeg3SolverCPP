@@ -1,4 +1,6 @@
-// g++ -std=c++20 polyroots1234.cpp
+// g++ framework.cpp Methods.h -DMETHOD="Baydoun<fp_t> Solver" -DNTESTS=100000 -o Baydoun -std=c++20
+// g++ framework.cpp Methods.h -DMETHOD="Vieta<fp_t> Solver" -DNTESTS=100000 -o Vieta -std=c++20
+
 #ifndef POLYROOTS1234_HPP
 #define POLYROOTS1234_HPP
 #define PR_NUMBERS_OF_ROOTS_EQUAL     0
@@ -17,7 +19,6 @@
 
 #include "Methods.h"
 using namespace implementations;
-
 
 // algorithm selector in polyroots2()
 #define PR_DISCRIMINANT_USE_TRADITIONAL_OPERATIONS_NORMALIZED 1
@@ -246,7 +247,34 @@ max_absolute_error=absolute_error_max; max_relative_error=relative_error_max;
 return rv;
 }
 
-
+/*
+Very slow. Dont use until fixed.
+template<typename fp_t> int compare_roots2(
+unsigned N_roots_to_check, // number of roots in (roots_to_check)
+unsigned N_roots_ground_truth,  // number of roots in (roots_ground_truth)
+std::vector<fp_t> &roots_to_check, // one should take into account only first (N_roots_to_check) roots here
+std::vector<fp_t> &roots_ground_truth, // one should take into account only first (N_roots_ground_truth) roots here
+fp_t &max_absolute_error, // here the greatest among the smallest deviations of the roots in (roots_to_check) and (roots_ground_truth)
+// will be placed
+fp_t &max_relative_error){
+    int rv = (N_roots_to_check<N_roots_ground_truth) ? PR_AT_LEAST_ONE_ROOT_LOST :
+      ( (N_roots_to_check>N_roots_ground_truth) ? PR_AT_LEAST_ONE_ROOT_IS_FAKE : PR_NUMBERS_OF_ROOTS_EQUAL );
+    long double abs = std::numeric_limits<long double >::max();
+    long double  rel = std::numeric_limits<long double >::max();
+    auto size = roots_to_check.size();
+    for(int j = 0;j<size; j++)
+    for(int i = 0;i < size; i++){
+        long double  absLoc = std::abs((long double)(roots_ground_truth[i])-(long double)(roots_to_check[(i + j) % size]));
+        abs = std::min(absLoc,abs);
+        rel = std::min(std::abs(
+                (long double)(absLoc + std::numeric_limits<fp_t>::epsilon())/
+                        (long double)(std::max(roots_to_check[(i + j) % size],roots_ground_truth[i]) + std::numeric_limits<fp_t>::epsilon())),rel);
+    }
+    max_absolute_error = abs;
+    max_relative_error = rel;
+    return rv;
+}
+*/
 
 // checks attainable number of real roots in a polynomial: a*x^4 + b*x^3 + c*x^2 + d*x + e; multiple root is treated as separate roots
 template <typename fp_t> int number_of_roots(unsigned P, // polynomial degree
@@ -272,9 +300,6 @@ switch (P)
 return -1; // inaccesible
 }
 
-
-
-
 typedef float fp_t; // floating point type for all the operations
 //typedef double fp_t; // floating point type for all the operations
 
@@ -282,7 +307,7 @@ int main(void)
 {
 // parameter section //////////////////////////////////////////////////////////////////////////////
 unsigned P=3; // max power to test (min is zero)
-unsigned long long N_tests=100000; // 100000000LLU; // total number of tests
+unsigned long long N_tests=NTESTS; // 100000000LLU; // total number of tests
 unsigned N_test_max_to_verbose_output=10; // maximal number of tests for which extended-verbosity output is produced
   // for every polynomial test
 unsigned N_pairs_of_complex_roots=0; // how many pairs of complex conjugate roots to introduce in each test
@@ -318,7 +343,8 @@ int i, j, rv, N_roots_gt_this_test, N_roots_found_this_test, N_roots_found_this_
 unsigned long long n_test;
 N_additive_feedback_fired=0ULL; N_multiplicative_feedback_fired=0ULL;
 
-Baydoun<fp_t> SolverB;
+// Baydoun or Vieta, based on make build
+METHOD;
 
 if (test_for_precision) // check correctness
   {
@@ -329,26 +355,11 @@ if (test_for_precision) // check correctness
     N_roots_gt_this_test=generate_polynomial<fp_t>(P, N_pairs_of_complex_roots, N_clustered_roots, N_multiple_roots,
       max_distance_between_clustered_roots, root_sweep_low, root_sweep_high, roots_gt_this_test, coefficients_this_test);
     
-    SolverB(coefficients_this_test, b_roots, true);
+    Solver(coefficients_this_test, b_roots, true);
     std::for_each(b_roots.begin(), b_roots.end(), [&roots_found_this_test](std::complex<fp_t> x){
         if(x.imag() <= 1) roots_found_this_test.push_back(x.real());
     });
     N_roots_found_this_test = roots_found_this_test.size();
-
-    switch(P)
-      {
-      case 2:
-
-        break;
-
-      case 3:
-
-        break;
-
-      case 4:
-
-        break;
-      }
 
     rv=compare_roots<fp_t>(N_roots_found_this_test, N_roots_gt_this_test, roots_found_this_test, roots_gt_this_test,
       ae_this_test_worst, re_this_test_worst);
