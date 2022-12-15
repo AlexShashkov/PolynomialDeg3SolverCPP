@@ -24,6 +24,15 @@ using namespace implementations;
 #define PR_DISCRIMINANT_USE_TRADITIONAL_OPERATIONS_NORMALIZED 1
 #define PR_DISCRIMINANT_USE_FMA_UNNORMALIZED                  2
 #define PR_DISCRIMINANT_USE_FMA_NORMALIZED                    3
+
+#ifndef METHOD
+#define METHOD Baydoun<fp_t> Solver
+#endif
+
+#ifndef NTESTS
+#define NTESTS 10000
+#endif
+
 int pr_discriminant_computation_method=0;
 int pr_lost_roots_saving_1=0;
 int pr_lost_roots_saving_2=0;
@@ -247,8 +256,7 @@ max_absolute_error=absolute_error_max; max_relative_error=relative_error_max;
 return rv;
 }
 
-/*
-Very slow. Dont use until fixed.
+// Very slow. Dont use until fixed.
 template<typename fp_t> int compare_roots2(
 unsigned N_roots_to_check, // number of roots in (roots_to_check)
 unsigned N_roots_ground_truth,  // number of roots in (roots_ground_truth)
@@ -274,7 +282,6 @@ fp_t &max_relative_error){
     max_relative_error = rel;
     return rv;
 }
-*/
 
 // checks attainable number of real roots in a polynomial: a*x^4 + b*x^3 + c*x^2 + d*x + e; multiple root is treated as separate roots
 template <typename fp_t> int number_of_roots(unsigned P, // polynomial degree
@@ -307,7 +314,7 @@ int main(void)
 {
 // parameter section //////////////////////////////////////////////////////////////////////////////
 unsigned P=3; // max power to test (min is zero)
-unsigned long long N_tests=NTESTS; // 100000000LLU; // total number of tests
+unsigned long long N_tests=NTESTS; // total number of tests based on makefile build
 unsigned N_test_max_to_verbose_output=10; // maximal number of tests for which extended-verbosity output is produced
   // for every polynomial test
 unsigned N_pairs_of_complex_roots=0; // how many pairs of complex conjugate roots to introduce in each test
@@ -349,15 +356,20 @@ METHOD;
 if (test_for_precision) // check correctness
   {
   std::streamsize fp_precision_original=std::cout.precision(); // save default precision to provide maximal reasonable output
-  for (n_test=0; n_test<N_tests; ++n_test)
+  for (n_test=0; n_test<N_tests; ++n_test) // N_tests
     {
+    roots_found_this_test.clear();
     std::vector<std::complex<fp_t>> b_roots;
     N_roots_gt_this_test=generate_polynomial<fp_t>(P, N_pairs_of_complex_roots, N_clustered_roots, N_multiple_roots,
       max_distance_between_clustered_roots, root_sweep_low, root_sweep_high, roots_gt_this_test, coefficients_this_test);
+
     
     Solver(coefficients_this_test, b_roots, true);
     std::for_each(b_roots.begin(), b_roots.end(), [&roots_found_this_test](std::complex<fp_t> x){
-        if(x.imag() <= 1) roots_found_this_test.push_back(x.real());
+        // if(x.imag() <= 1){
+          // std::cout << "dddd " << x.real();
+          roots_found_this_test.push_back(x.real());
+        // }
     });
     N_roots_found_this_test = roots_found_this_test.size();
 

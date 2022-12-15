@@ -12,6 +12,9 @@
 using namespace std::complex_literals;
 
 namespace implementations{
+    using std::complex;
+    using std::vector;
+
 	/*Аргумент комплексного числа. std::arg охватывает не все случаи
 	@type inp: complex<TEMPLATE>
 	@param inp: Комплексное число.
@@ -19,14 +22,14 @@ namespace implementations{
 	@returns: Аргумент комплексного числа.
 	*/
 	template <typename number>
-	number argp(std::complex<number> inp){
+	number argp(complex<number> inp){
 		const number _PI = std::numbers::pi_v<number>;
 		number x = std::real(inp);
 		number y = std::imag(inp);
 		if(x > 0) return std::arg(inp);
 		else{
 			number _pi = y < 0 ? -_PI: _PI;
-			return x == 0 ? _pi/static_cast<number>(2) : std::arg(inp) + _pi;
+			return x == 0 ? _pi/static_cast<number>(2) : std::atan(y/x) + _pi;
 		}
 	}
 
@@ -50,7 +53,7 @@ namespace implementations{
 	@rtype:  complex<TEMPLATE>
 	*/
 	template <typename number>
-	std::complex<number> fms(std::complex<number> a, std::complex<number> b, std::complex<number> c,std::complex<number> d) {
+	complex<number> fms(std::complex<number> a, std::complex<number> b, std::complex<number> c,std::complex<number> d) {
 		return {fms(a.real(),b.real(),c.real(),d.real())+fms(c.imag(),d.imag(),a.imag(),b.imag()),
 		fms(a.real(),b.imag(),c.real(),d.imag())+fms(b.real(),a.imag(),d.real(),c.imag())};
 	}
@@ -63,11 +66,24 @@ namespace implementations{
 	@rtype:  complex<TEMPLATE>
 	*/
 	template <typename number>
-	std::complex<number> fma(std::complex<number> a, std::complex<number> b, std::complex<number> c) {
+	complex<number> fma(std::complex<number> a, std::complex<number> b, std::complex<number> c) {
 		return {fms(a.real(), b.real(), a.imag(), b.imag()) + c.real(),
-			fma(a.real(), b.imag(), fma(a.imag(), b.real(), c.imag()))
+			std::fma(a.real(), b.imag(), std::fma(a.imag(), b.real(), c.imag()))
 		};
 	}
+
+	/*Fused multiply-add for complex&real numbers
+	@type a: complex<TEMPLATE>
+	@type b: complex<TEMPLATE>
+	@type c: TEMPLATE
+	@returns: a*b+c
+	@rtype:  complex<TEMPLATE>
+	*/
+	template <typename number>
+	complex<number> fma(std::complex<number> a, std::complex<number> b, number c){
+		return {std::fma(a.real(),b.real(),std::fma(-b.imag(),a.imag(),c)),fms(a.real(),b.imag(),-b.real(),a.imag())};
+	}
+	
 
 	/*
 	Имплементация 'Analytical formula for the roots of the general complex cubic polynomial'
@@ -82,7 +98,6 @@ namespace implementations{
 		number one27;
 		number sqrt3;
 		number cbrt4ftwo;
-		number THRESHOLD;
 
 		/*Вычисление вспомогательных степеней коэффициентов полинома.
 		@type b: TEMPLATE*
@@ -124,7 +139,7 @@ namespace implementations{
 		@rtype: vector<complex<TEMPLATE>>
 		@returns: Корни уравнения.
 		*/
-		std::vector<std::complex<number>> part2(number *b, number *c, number *d,
+		vector<complex<number>> part2(number *b, number *c, number *d,
 				number o, number r, number bthree, number tmp1){
 			// Самые часто вызываемые переменные
 
@@ -151,23 +166,22 @@ namespace implementations{
 				fms(d[2], fms(static_cast<number>(2)*b0, std::fma(static_cast<number>(72), c0, -b1),static_cast<number>(27),d0),
 				b1c1, d0*static_cast<number>(3)*fms(static_cast<number>(8), b2, static_cast<number>(-97),d0));
 			number partiond0 = std::fma(tmp,fms(static_cast<number>(14)*b0,c1,static_cast<number>(4)*b2,c0),fms(static_cast<number>(14)*b0c1,d0,static_cast<number>(12)*c0,d1))+ std::fma(b1,d1,c[3]);
-			std::complex<number> sqrt1;
-			sqrt1 = o > THRESHOLD ? sqrt(o) : std::complex<number>(0, 1)*static_cast<number>(sqrt(fabs(o)));
-			std::complex<number> sqrt2 = std::complex<number>(0, 1)*sqrt3;
-			std::complex<number> sqrt2div3 = sqrt2*onethree;
-			std::complex<number> sqrt2div9 = sqrt2div3*onethree;
+			complex<number> sqrt1 = o >= 0 ? sqrt(o) : complex<number>(0, 1)*static_cast<number>(sqrt(fabs(o)));
+			complex<number> sqrt2 = std::complex<number>(0, 1)*sqrt3;
+			complex<number> sqrt2div3 = sqrt2*onethree;
+			complex<number> sqrt2div9 = sqrt2div3*onethree;
 
-			std::complex<number> bl = tmp * sqrt1 * std::fma(static_cast<number>(4)*b0c0,-tmp,std::fma(static_cast<number>(2),c2,d1)) + sqrt2div9*t;
-			std::complex<number> bl1 = pow(bl, onethree);
-			std::complex<number> bl2 = pow(bl1, static_cast<number>(2));
-			std::complex<number> A1 = (-sqrt2div3)*static_cast<number>(2)*std::fma(b1,std::fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15), c0*d0, static_cast<number>(13),b0c1)) + static_cast<number>(2)*c0*sqrt1;
-			std::complex<number> A2 = fms(static_cast<number>(2)*b1*d0, fms(b0, d0, static_cast<number>(-58), c1), static_cast<number>(8)*b2,
+			complex<number> bl = tmp * sqrt1 * std::fma(static_cast<number>(4)*b0c0,-tmp,std::fma(static_cast<number>(2),c2,d1)) + sqrt2div9*t;
+			complex<number> bl1 = pow(bl, onethree);
+			complex<number> bl2 = pow(bl1, static_cast<number>(2));
+			complex<number> A1 = (-sqrt2div3)*static_cast<number>(2)*std::fma(b1,std::fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15), c0*d0, static_cast<number>(13),b0c1)) + static_cast<number>(2)*c0*sqrt1;
+			complex<number> A2 = fms(static_cast<number>(2)*b1*d0, fms(b0, d0, static_cast<number>(-58), c1), static_cast<number>(8)*b2,
 				fms(b0c0, tmp, static_cast<number>(-5), c2)) + \
 				fms(b0c0, fms(static_cast<number>(23), c2, static_cast<number>(99), d1), static_cast<number>(-3)*d0, fms(static_cast<number>(9), d1, 
 				static_cast<number>(7),c2)) - sqrt1*sqrt2 *std::fma(static_cast<number>(2)*b0c0,fms(static_cast<number>(4),b0c0,static_cast<number>(5),d0),
 				std::fma(static_cast<number>(3),d1,c2));
-			std::complex<number>  Rbase = sqrt1 * sqrt2div9;
-			std::complex<number> R1, R2;
+			complex<number>  Rbase = sqrt1 * sqrt2div9;
+			complex<number> R1, R2;
 			if (o == 0)
 				if (r > 0){
 					R1 = pow(Rbase + r, onethree);
@@ -181,22 +195,26 @@ namespace implementations{
 				R1 = pow(Rbase + r, onethree);
 				R2 = pow(Rbase - r, onethree);
 			}
-			std::complex<number>  sqrt205=sqrt2*static_cast<number>(0.5);
-			std::complex<number> M[2] = {static_cast<number>(0.5) - sqrt205, static_cast<number>(0.5) + sqrt205};
+			complex<number>  sqrt205=sqrt2*static_cast<number>(0.5);
+			complex<number> M[2] = {static_cast<number>(0.5) - sqrt205, static_cast<number>(0.5) + sqrt205};
 
-			std::complex<number>  arg1_1 = A1*bl1;
-			std::complex<number>  arg1_2 = -partiond0*R1;
-			std::complex<number>  arg2_1 = A2*bl2;
-			std::complex<number>  arg2_2 = static_cast<number>(pow(partiond0, static_cast<number>(2)))*R2;
+			complex<number>  arg1_1 = A1*bl1;
+			complex<number>  arg1_2 = -partiond0*R1;
+			complex<number>  arg2_1 = A2*bl2;
+			complex<number>  arg2_2 = static_cast<number>(pow(partiond0, static_cast<number>(2)))*R2;
 			// Вычисляем аргумент комплексного числа
+			// number phi1 = std::arg(arg1_1) - std::arg(arg1_2);
+			// number phi2 = std::arg(arg2_1) - std::arg(arg2_2); 
+			// std::cout << "argp, 1_1, 1_2, 2_1, 2_2 " << argp(arg1_1) << " " << argp(arg1_2) << " " << argp(arg2_1) << " " << argp(arg2_2) << "\n";
+			// std::cout << "arg, 1_1, 1_2, 2_1, 2_2 "  << std::arg(arg1_1) << " " << std::arg(arg1_2) << " " << std::arg(arg2_1) << " " << std::arg(arg2_2) << "\n";
 			number phi1 = argp(arg1_1) - argp(arg1_2);
 			number phi2 = argp(arg2_1) - argp(arg2_2); 
-			std::complex<number> a1 = (cbrt4ftwo)*(std::cos(phi1)+std::complex<number>(0, std::sin(phi1)));
-			std::complex<number> a2 = (cbrt4ftwo)*(std::cos(phi2)+std::complex<number>(0, std::sin(phi2)));
-			std::complex<number> x1 = fms(a2,R2,a1,R1) - bthree;
-			std::complex<number> x2 = fms(M[0]*a1,R1,M[1]*a2,R2) - bthree;
-			std::complex<number> x3 = fms(M[1]*a1,R1,M[0]*a2,R2) - bthree;
-			return std::vector<std::complex<number>>{x1, x2, x3};
+			complex<number> a1 = (cbrt4ftwo)*(std::cos(phi1)+std::complex<number>(0, std::sin(phi1)));
+			complex<number> a2 = (cbrt4ftwo)*(std::cos(phi2)+std::complex<number>(0, std::sin(phi2)));
+			complex<number> x1 = fma(a2,R2,-fma(a1,R1,bthree));
+			complex<number> x2 = fma(M[0]*a1,R1,-fma(M[1]*a2,R2,bthree));
+			complex<number> x3 = fma(M[1]*a1,R1,-fma(M[0]*a2,R2,bthree));
+			return vector<complex<number>>{x1, x2, x3};
 		}
 
 		/*Начало вычисления.
@@ -211,7 +229,7 @@ namespace implementations{
 		@rtype: int
 		@returns: Количество корней.
 		*/
-		int solve(number *b, number *c, number *d, std::vector<std::complex<number>> &roots){
+		int solve(number *b, number *c, number *d, vector<complex<number>> &roots){
 			number d0 = d[0];
 			number b0 = b[0];
 			number c0 = c[0];
@@ -222,8 +240,10 @@ namespace implementations{
 			number r = std::fma(one27,fms(static_cast<number>(2), b[2], static_cast<number>(9), b0*c0),d0);
 			number bthree = b0*onethree;
 
+            // std::cout << "o r : " << o << " " << r << "\n";
+
 			if(o == 0 && r == 0){
-				roots = std::vector<std::complex<number>>{-bthree, -bthree, -bthree};
+				roots = vector<complex<number>>{-bthree, -bthree, -bthree};
 				return 3;
 			}
 			else{
@@ -233,11 +253,7 @@ namespace implementations{
 		}
 
 	public:
-		/*Конструктор
-		@type trsh: TEMPLATE
-		@param trsh: Пороговое значение для переменной o.
-		*/
-		Baydoun(number trsh){
+		Baydoun(){
 			long double _onethree = 1.0L/3.0L;
 			long double _one27 = _onethree*_onethree*_onethree;
 			long double _sqrt3 = std::sqrt(3L);
@@ -247,7 +263,6 @@ namespace implementations{
 			one27 = static_cast<number>(_one27);
 			sqrt3 = static_cast<number>(_sqrt3);
 			cbrt4ftwo = static_cast<number>(_cbrt4ftwo);
-			THRESHOLD=trsh;
 		}
 
 		/*Функтор для решения уравнения методом Baydoun.
@@ -265,7 +280,7 @@ namespace implementations{
 		@returns: Количество корней.
 		*/
 		int operator()(number a, number b, number c, number d,
-				std::vector<std::complex<number>> &roots){
+				vector<complex<number>> &roots){
 			// x^3, x^2, x, c
 			if(a != 0 && std::isfinite(a)){
 				b /= a;
@@ -298,7 +313,7 @@ namespace implementations{
 		@rtype: int
 		@returns: Количество корней.
 		*/
-		int operator()(std::vector<number> &inp, std::vector<std::complex<number>> &roots, bool reverse=false){
+		int operator()(vector<number> &inp, std::vector<complex<number>> &roots, bool reverse=false){
 			return reverse ?
 				operator()(inp[3], inp[2], inp[1], inp[0], roots):
 				operator()(inp[0], inp[1], inp[2], inp[3], roots);
@@ -315,11 +330,11 @@ namespace implementations{
 		@returns: Количество корней в каждом полиноме.
 		*/
 		int* operator()(number **poly, int count,
-				std::vector<std::vector<std::complex<number>>> &roots){
+				vector<std::vector<complex<number>>> &roots){
 			// x^3, x^2, x, c
 			int *numbers = new int[count];
 			for(int i = 0; i < count; i++){
-				std::vector<std::complex<number>> res;
+				vector<complex<number>> res;
 				numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
 				roots.push_back(res);
 			}
@@ -337,11 +352,11 @@ namespace implementations{
 		@returns: Количество корней в каждом полиноме.
 		*/
 		int* operator()(number poly[][4], int count,
-				std::vector<std::vector<std::complex<number>>> &roots){
+				vector<std::vector<complex<number>>> &roots){
 			// x^3, x^2, x, c
 			int *numbers = new int[count];
 			for(int i = 0; i < count; i++){
-				std::vector<std::complex<number>> res;
+				vector<complex<number>> res;
 				numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
 				roots.push_back(res);
 			}
@@ -375,8 +390,8 @@ namespace implementations{
 		@rtype: vector<complex<TEMPLATE>>
 		@returns: Вектор, хранящий корни уравнения.
 		*/
-		std::vector<std::complex<number>> degenerate(number R, number b, number inp2three){
-			std::vector<std::complex<number>> roots;
+		vector<complex<number>> Degenerate(number R, number b, number inp2three){
+			vector<complex<number>> roots;
 			number _x = cbrt(R);
 			auto x1 = -std::fma(static_cast<number>(2),_x,inp2three);
 			auto x2 = _x-inp2three;
@@ -400,8 +415,8 @@ namespace implementations{
 		@rtype: vector<complex<TEMPLATE>>
 		@returns: Вектор, хранящий корни уравнения.
 		*/
-		std::vector<std::complex<number>> usual(number Q, number Q3, number R, number b, number inp2three){
-			std::vector<std::complex<number>> roots;
+		vector<complex<number>> Usual(number Q, number Q3, number R, number b, number inp2three){
+			vector<complex<number>> roots;
 			number x1,x2,x3 = 0;
 			number phi = acos(R/sqrt(Q3))*onethree;
 			number sqrtQ = static_cast<number>(-2)*sqrt(Q);
@@ -427,10 +442,10 @@ namespace implementations{
 		@rtype: vector<complex<TEMPLATE>>
 		@returns: Вектор, хранящий корни уравнения.
 		*/
-		std::vector<std::complex<number>> complex(number Q, number Q3, number R, number b, number inp2three){
-			std::vector<std::complex<number>> roots;
+		vector<complex<number>> Complex(number Q, number Q3, number R, number b, number inp2three){
+			vector<complex<number>> roots;
 			number x1 = 0;
-			std::complex<number>  x2, x3 = 0;
+			complex<number>  x2, x3 = 0;
 			number _phi= 0;
 			number T;
 			number Tin;
@@ -454,8 +469,8 @@ namespace implementations{
 			}
 			Tin = T - inp2three;
 			x1 = -std::fma(static_cast<number>(2),T,inp2three);
-			x2 = std::complex<number>(Tin,sqrtsh);
-			x3 = std::complex<number>(Tin,-sqrtsh);
+			x2 = complex<number>(Tin,sqrtsh);
+			x3 = complex<number>(Tin,-sqrtsh);
 			roots = {x1, x2, x3};
 			for (auto &r: roots) {
 				if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
@@ -488,7 +503,7 @@ namespace implementations{
 		@returns: Количество корней.
 		*/
 		int operator()(number a, number b, number c, number d,
-				std::vector<std::complex<number>> &roots){
+				vector<complex<number>> &roots){
 			// x^3, x^2, x, c
 			if(a != 0 && std::isfinite(a)){
 				b /= a;
@@ -510,13 +525,13 @@ namespace implementations{
 				auto Q3 = Q*Q*Q;
 				auto S = std::fma(-R,R,Q3);
 				if(S==0 || !std::isfinite(S)){
-					roots = degenerate(R, b, b_onethree);
+					roots = Degenerate(R, b, b_onethree);
 				}
 				else if(S > 0){
-					roots = usual(Q, Q3, R, b, b_onethree);
+					roots = Usual(Q, Q3, R, b, b_onethree);
 				}
 				else{
-					roots = complex(Q, Q3, R, b, b_onethree);
+					roots = Complex(Q, Q3, R, b, b_onethree);
 				}
 				return roots.size();
 			}
@@ -532,7 +547,7 @@ namespace implementations{
 		@rtype: int
 		@returns: Количество корней.
 		*/
-		int operator()(std::vector<number> &inp, std::vector<std::complex<number>> &roots, bool reverse=false){
+		int operator()(vector<number> &inp, std::vector<complex<number>> &roots, bool reverse=false){
 			return reverse ?
 				operator()(inp[3], inp[2], inp[1], inp[0], roots):
 				operator()(inp[0], inp[1], inp[2], inp[3], roots);
@@ -549,11 +564,11 @@ namespace implementations{
 		@returns: Количество корней в каждом полиноме.
 		*/
 		int* operator()(number **poly, int count,
-				std::vector<std::vector<std::complex<number>>> &roots){
+				vector<std::vector<complex<number>>> &roots){
 			// x^3, x^2, x, c
 			int *numbers = new int[count];
 
-			std::vector<std::complex<number>> res;
+			vector<complex<number>> res;
 			for(int i = 0; i < count; i++){
 				numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
 				roots.push_back(res);
@@ -573,10 +588,10 @@ namespace implementations{
 		@returns: Количество корней в каждом полиноме.
 		*/
 		int* operator()(number poly[][4], int count,
-				std::vector<std::vector<std::complex<number>>> &roots){
+				vector<std::vector<complex<number>>> &roots){
 			// x^3, x^2, x, c
 			int *numbers = new int[count];
-			std::vector<std::complex<number>> res;
+			vector<complex<number>> res;
 			for(int i = 0; i < count; i++){
 				numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
 				roots.push_back(res);
