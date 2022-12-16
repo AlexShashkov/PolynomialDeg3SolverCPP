@@ -72,7 +72,7 @@ namespace implementations{
 		};
 	}
 
-	/*Fused multiply-add for complex&real numbers
+	/*Fused multiply-add for complex & real numbers
 	@type a: complex<TEMPLATE>
 	@type b: complex<TEMPLATE>
 	@type c: TEMPLATE
@@ -202,11 +202,8 @@ namespace implementations{
 			complex<number>  arg1_2 = -partiond0*R1;
 			complex<number>  arg2_1 = A2*bl2;
 			complex<number>  arg2_2 = static_cast<number>(pow(partiond0, static_cast<number>(2)))*R2;
+			
 			// Вычисляем аргумент комплексного числа
-			// number phi1 = std::arg(arg1_1) - std::arg(arg1_2);
-			// number phi2 = std::arg(arg2_1) - std::arg(arg2_2); 
-			// std::cout << "argp, 1_1, 1_2, 2_1, 2_2 " << argp(arg1_1) << " " << argp(arg1_2) << " " << argp(arg2_1) << " " << argp(arg2_2) << "\n";
-			// std::cout << "arg, 1_1, 1_2, 2_1, 2_2 "  << std::arg(arg1_1) << " " << std::arg(arg1_2) << " " << std::arg(arg2_1) << " " << std::arg(arg2_2) << "\n";
 			number phi1 = argp(arg1_1) - argp(arg1_2);
 			number phi2 = argp(arg2_1) - argp(arg2_2); 
 			complex<number> a1 = (cbrt4ftwo)*(std::cos(phi1)+std::complex<number>(0, std::sin(phi1)));
