@@ -29,7 +29,7 @@ namespace implementations{
 		if(x > 0) return std::atan2(y, x);
 		else{
 			number _pi = y < 0 ? -_PI: _PI;
-			return x == 0 ? _pi/static_cast<number>(2) : std::atan(y/x) + _pi;
+			return x == 0 ? _pi/static_cast<number>(2) : std::atan2(y, x) + _pi;
 		}
 	}
 

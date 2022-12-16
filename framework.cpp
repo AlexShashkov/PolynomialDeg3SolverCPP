@@ -44,7 +44,7 @@ unsigned long long N_multiplicative_feedback_fired=0ULL;
 Nicolas Louvet, and Jean-Michel Muller, "Further Analysis of Kahan's Algorithm for the Accurate Computation of 2x2 Determinants".
 Mathematics of Computation, Vol. 82, No. 284, Oct. 2013, pp. 2245-2264 */
 template <typename fp_t> inline fp_t pr_product_difference(fp_t a, fp_t b, fp_t c, fp_t d)
-{ fp_t tmp=d*c; return std::fma(a, b, -tmp) + std::fma(-d, c, tmp); }
+{ return std::fma(a, b, -d*c); }
 
 
 // Creates a test polynomial, both in the form of roots, e.g. (x-roots[0])*(x-roots[1])*(quadratic polynomial with no real roots)
@@ -373,7 +373,7 @@ if (test_for_precision) // check correctness
     });
     N_roots_found_this_test = roots_found_this_test.size();
 
-    rv=compare_roots<fp_t>(N_roots_found_this_test, N_roots_gt_this_test, roots_found_this_test, roots_gt_this_test,
+    rv=compare_roots2<fp_t>(N_roots_found_this_test, N_roots_gt_this_test, roots_found_this_test, roots_gt_this_test,
       ae_this_test_worst, re_this_test_worst);
 
     N_roots_verified_this_test=P; /* number_of_roots<fp_t>(P,coefficients_this_test[4],coefficients_this_test[3],
@@ -481,6 +481,34 @@ if (test_for_precision) // check correctness
   for (i=0; i<=P; ++i) std::cout << std::setprecision(std::numeric_limits<fp_t>::digits10 + 1)
     << "c_re[" << i << "]=" << coefficients_all_tests_re_worst[i] << (i<P ? ", " : "\n");
   */
+
+  std::cout << "\nWorst case method results ae: ";
+  for (auto &root : roots_found_all_tests_ae_worst){
+      std::cout << root << " ";
+  }
+  std::cout << "\nGround truth worst ae: {";
+  for (auto &root : roots_gt_all_tests_ae_worst){
+      std::cout << root << ", ";
+  }
+  std::cout << "}\nCoeffs worst ae: {";
+  for (auto &root : coefficients_all_tests_ae_worst){
+      std::cout << root << ", ";
+  }
+
+
+  std::cout << "}\nWorst case method results re: ";
+  for (auto &root : roots_found_all_tests_re_worst){
+      std::cout << root << " ";
+  }
+  std::cout << "\nGround truth worst re: {";
+  for (auto &root : roots_gt_all_tests_re_worst){
+      std::cout << root << ", ";
+  }
+  std::cout << "}\nCoeffs worst re: {";
+  for (auto &root : coefficients_all_tests_re_worst){
+      std::cout << root << ", ";
+  }
+  std::cout << "}\n";
 
   std::cout << std::setprecision(fp_precision_original); // restore default precision
   } // if (test_for_precision)
