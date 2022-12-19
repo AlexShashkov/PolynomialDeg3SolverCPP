@@ -228,41 +228,6 @@ unsigned N_roots_ground_truth,  // number of roots in (roots_ground_truth)
 std::vector<fp_t> &roots_to_check, // one should take into account only first (N_roots_to_check) roots here
 std::vector<fp_t> &roots_ground_truth, // one should take into account only first (N_roots_ground_truth) roots here
 fp_t &max_absolute_error, // here the greatest among the smallest deviations of the roots in (roots_to_check) and (roots_ground_truth)
-  // will be placed
-fp_t &max_relative_error) // here the greatest relative error among all the roots found will be placed
-{
-int rv, i_closest_root, j_closest_root;
-fp_t deviation, deviation_min_for_this_root, absolute_error_max=static_cast<fp_t>(0.0L),
-  relative_error_for_this_root, relative_error_max=static_cast<fp_t>(0.0L);
-rv= (N_roots_to_check<N_roots_ground_truth) ? PR_AT_LEAST_ONE_ROOT_LOST :
-  ( (N_roots_to_check>N_roots_ground_truth) ? PR_AT_LEAST_ONE_ROOT_IS_FAKE : PR_NUMBERS_OF_ROOTS_EQUAL );
-// find the largest distance between the closest pairs of roots: one - from ground truth, one - from found ones
-for (int i=0; i<N_roots_ground_truth; ++i)
-  {
-  // find the closest found root to the given ground truth root
-  deviation_min_for_this_root=std::numeric_limits<fp_t>::infinity(); i_closest_root=-1; j_closest_root=-1;
-  for (int j=0; j<N_roots_to_check; ++j)
-    {
-    deviation=std::abs(roots_ground_truth[i]-roots_to_check[j]);
-    deviation_min_for_this_root=deviation<deviation_min_for_this_root ? i_closest_root=i, j_closest_root=j, deviation : deviation_min_for_this_root;
-    }
-  relative_error_for_this_root=static_cast<fp_t>(2.0L)*deviation_min_for_this_root/
-    (std::abs(roots_ground_truth[i_closest_root])+std::abs(roots_to_check[j_closest_root]));
-
-  absolute_error_max=deviation_min_for_this_root>absolute_error_max ? deviation_min_for_this_root : absolute_error_max;
-  relative_error_max=relative_error_for_this_root>relative_error_max ? relative_error_for_this_root : relative_error_max;
-  }
-max_absolute_error=absolute_error_max; max_relative_error=relative_error_max;
-return rv;
-}
-
-// Very slow. Dont use until fixed.
-template<typename fp_t> int compare_roots2(
-unsigned N_roots_to_check, // number of roots in (roots_to_check)
-unsigned N_roots_ground_truth,  // number of roots in (roots_ground_truth)
-std::vector<fp_t> &roots_to_check, // one should take into account only first (N_roots_to_check) roots here
-std::vector<fp_t> &roots_ground_truth, // one should take into account only first (N_roots_ground_truth) roots here
-fp_t &max_absolute_error, // here the greatest among the smallest deviations of the roots in (roots_to_check) and (roots_ground_truth)
 // will be placed
 fp_t &max_relative_error){
     int rv = (N_roots_to_check<N_roots_ground_truth) ? PR_AT_LEAST_ONE_ROOT_LOST :
@@ -373,7 +338,7 @@ if (test_for_precision) // check correctness
     });
     N_roots_found_this_test = roots_found_this_test.size();
 
-    rv=compare_roots2<fp_t>(N_roots_found_this_test, N_roots_gt_this_test, roots_found_this_test, roots_gt_this_test,
+    rv=compare_roots<fp_t>(N_roots_found_this_test, N_roots_gt_this_test, roots_found_this_test, roots_gt_this_test,
       ae_this_test_worst, re_this_test_worst);
 
     N_roots_verified_this_test=P; /* number_of_roots<fp_t>(P,coefficients_this_test[4],coefficients_this_test[3],

@@ -237,8 +237,6 @@ namespace implementations{
 			number r = std::fma(one27,fms(static_cast<number>(2), b[2], static_cast<number>(9), b0*c0),d0);
 			number bthree = b0*onethree;
 
-            // std::cout << "o r : " << o << " " << r << "\n";
-
 			if(o == 0 && r == 0){
 				roots = vector<complex<number>>{-bthree, -bthree, -bthree};
 				return 3;
