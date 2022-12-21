@@ -18,13 +18,7 @@ namespace implementations{
 
 	const long double _PI = std::numbers::pi_v<long double>;
 
-	/*
-	Fused multiply-substract
-	@type a: TEMPLATE
-	@type b: TEMPLATE
-	@type c: TEMPLATE
-	@type d: TEMPLATE
-	@rtype:  TEMPLATE
+	/** \brief Fused multiply-substract
 	*/
 	template <typename number>
 	inline number fms(number a, number b, number c, number d) {
@@ -32,13 +26,7 @@ namespace implementations{
 		return fma(a, b, -tmp) + fma(-d, c, tmp);
 	}
 
-	/*
-	Fused multiply-substract for complex numbers
-	@type a: complex<TEMPLATE>
-	@type b: complex<TEMPLATE>
-	@type c: complex<TEMPLATE>
-	@type d: complex<TEMPLATE>
-	@rtype:  complex<TEMPLATE>
+	/** \brief Fused multiply-substract for complex numbers
 	*/
 	template <typename number>
 	inline complex<number> fms(std::complex<number> a, std::complex<number> b, std::complex<number> c,std::complex<number> d) {
@@ -48,13 +36,8 @@ namespace implementations{
 		};
 	}
 
-	/*
-	Fused multiply-add for complex numbers
-	@type a: complex<TEMPLATE>
-	@type b: complex<TEMPLATE>
-	@type c: complex<TEMPLATE>
-	@returns: a*b+c
-	@rtype:  complex<TEMPLATE>
+	/** \brief Fused multiply-substract for complex numbers
+	 * 	\return a*b+c
 	*/
 	template<typename number>
 	inline complex<number> fma(complex<number> a, complex<number> b, complex<number> c) {
@@ -64,61 +47,50 @@ namespace implementations{
 		};
 	}
 
-	/*
-	Fused multiply-add for complex & real numbers
-	@type a: complex<TEMPLATE>
-	@type b: complex<TEMPLATE>
-	@type c: TEMPLATE
-	@returns: a*b+c
-	@rtype:  complex<TEMPLATE>
+	/** \brief Fused multiply-substract for complex&real numbers
+	 * 	\return a*b+c
 	*/
 	template <typename number>
 	inline complex<number> fma(std::complex<number> a, std::complex<number> b, number c){
 		return {std::fma(a.real(),b.real(),std::fma(-b.imag(),a.imag(),c)),fms(a.real(),b.imag(),-b.real(),a.imag())};
 	}
 
-	/*
-	Fused multiply-add for complex & real numbers
-	@type a: complex<TEMPLATE>
-	@type b: complex<TEMPLATE>
-	@type c: TEMPLATE
-	@returns: a*b+c
-	@rtype:  complex<TEMPLATE>
+	/** \brief Fused multiply-substract for complex&real numbers
+	 * 	\return a*b+c
 	*/
 	template <typename number>
 	inline complex<number> fma(complex<number> a, number b, complex<number> c){
 		return {std::fma(a.real(),b,c.real()),std::fma(a.imag(),b,c.imag())};
 	}
-	/*
-	Fused multiply-add for complex & real numbers
-	@type a: complex<TEMPLATE>
-	@type b: complex<TEMPLATE>
-	@type c: TEMPLATE
-	@returns: a*b+c
-	@rtype:  complex<TEMPLATE>
+
+	/** \brief Fused multiply-substract for complex&real numbers
+	 * 	\return a*b+c
 	*/
 	template <typename number>
 	inline complex<number> fma(number a,number b, complex<number> c){
 		return {std::fma(a,b,c.real()),c.imag()};
 	}
-	/*
-	Fused multiply-add for complex & real numbers
-	@type a: complex<TEMPLATE>
-	@type b: complex<TEMPLATE>
-	@type c: TEMPLATE
-	@returns: a*b+c
-	@rtype:  complex<TEMPLATE>
+
+	/** \brief Fused multiply-substract for complex&real numbers
+	 * 	\return a*b+c
 	*/
 	template <typename number>
-	inline complex<number> fma(complex<number> a,number b,number c){
+	inline complex<number> fma(complex<number> a,number b, number c){
 		return {std::fma(a.real(),b,c),a.imag()*b};
 	}
 	
 
-	/*
-	Имплементация 'Analytical formula for the roots of the general complex cubic polynomial'
-	Автор: Ibrahim Baydoun
-	Статья: https://arxiv.org/abs/1512.07585
+	/** \class Baydoun
+	Имплементация 'Analytical formula for the roots of the general complex cubic polynomial' \n
+	\author Ibrahim Baydoun 
+
+	Статья: https://arxiv.org/abs/1512.07585 \n
+	Пример использования:
+
+		Baydoun<fp_t> Solver; // - Создаст объект Solver, который будет принимать коэффициенты указанного типа fp_t.
+		int cnt = Solver(coefficients, roots); // Решит уравнение с коэффициентами, указанными в векторе coefficients,  roots - ссылка на вектор, в котором будут сохранены полученные корни.
+	
+	Функтор вернет int, в котором будет указано количество найденных корней.
 	*/
 	template <typename number>
 	class Baydoun
@@ -129,12 +101,11 @@ namespace implementations{
 		number sqrt3;
 		number cbrt4ftwo;
 
-		/*
-		Аргумент комплексного числа. std::arg охватывает не все случаи
-		@type inp: complex<TEMPLATE>
-		@param inp: Комплексное число.
-		@rtype: TEMPLATE
-		@returns: Аргумент комплексного числа.
+		/** \brief Аргумент комплексного числа. std::arg охватывает не все случаи
+		 * 	\param inp Комплексное число.
+		 * 	\param c Массив, в котором хранятся коэффициенты x.
+		 * 	\param d Массив, в котором хранятся коэффициенты C.
+		 * 	\return Аргумент комплексного числа.
 		*/
 		inline number argp(complex<number> inp){
 			number x = std::real(inp);
@@ -146,18 +117,11 @@ namespace implementations{
 			}
 		}
 
-		/*
-		Начало вычисления.
-		@type b: TEMPLATE*
-		@param b: Массив, в котором хранятся коэффициенты x^2.
-		@type c: TEMPLATE*
-		@param c: Массив, в котором хранятся коэффициенты x.
-		@type d: TEMPLATE*
-		@param d: Массив, в котором хранятся коэффициенты C.
-		@type roots: vector<complex<TEMPLATE>>&
-		@param root: Вектор, который хранит корни уравнения.
-		@rtype: int
-		@returns: Количество корней.
+		/** \brief Начало вычисления.
+		 * 	\param b Массив, в котором хранятся коэффициенты x^2
+		 * 	\param c Массив, в котором хранятся коэффициенты x.
+		 * 	\param d Массив, в котором хранятся коэффициенты C.
+		 * 	\return Количество корней.
 		*/
 		inline int solve(number *b, number *c, number *d, vector<complex<number>> &roots){
 			number d0 = d[0];
@@ -261,20 +225,13 @@ namespace implementations{
 			cbrt4ftwo = static_cast<number>(pow(4L, _onethree)*static_cast<number>(0.5));
 		}
 
-		/*
-		Функтор для решения уравнения методом Baydoun.
-		@type a: TEMPLATE
-		@param a: Коэффициент x^3.
-		@type b: TEMPLATE
-		@param b: Коэффициент x^2.
-		@type c: TEMPLATE
-		@param c: Коэффициент x.
-		@type d: TEMPLATE
-		@param d: Коэффициент C.
-		@type roots: vector<complex<TEMPLATE>>&
-		@param root: Вектор, который хранит корни уравнения.
-		@rtype: int
-		@returns: Количество корней.
+		/** \brief Функтор для решения уравнения методом Baydoun.
+		 * 	\param a Коэффициент x^3.
+		 * 	\param b Коэффициент x^2.
+		 * 	\param c Коэффициент x.
+		 * 	\param d Коэффициент C.
+		 * 	\param root: Вектор, который хранит корни уравнения.
+		 * 	\return Количество корней.
 		*/
 		int operator()(number a, number b, number c, number d,
 				vector<complex<number>> &roots){
@@ -315,16 +272,11 @@ namespace implementations{
 			return result;
 		}
 
-		/*
-		Функтор для решения уравнения методом Baydoun.
-		@type inp: vector<TEMPLATE>&
-		@param a: Коэффициенты.
-		@type roots: vector<complex<TEMPLATE>>&
-		@param root: Вектор, который хранит корни уравнения.
-		@type reverse: bool
-		@param reverse: Необходимо ли рассматривать коэффициенты в обратном порядке
-		@rtype: int
-		@returns: Количество корней.
+		/** \brief Функтор для решения уравнения методом Baydoun.
+		 * 	\param inp Коэффициенты.
+		 * 	\param root Вектор, который хранит корни уравнения.
+		 * 	\param reverse Необходимо ли рассматривать коэффициенты в обратном порядке
+		 * 	\return Количество корней.
 		*/
 		int operator()(vector<number> &inp, std::vector<complex<number>> &roots, bool reverse=false){
 			return reverse ?
@@ -332,16 +284,11 @@ namespace implementations{
 				operator()(inp[0], inp[1], inp[2], inp[3], roots);
 		}
 
-		/*
-		Функтор для решения уравнений методом Baydoun.
-		@type poly: TEMPLATE**
-		@param a: Динамический массив размером (coun, 4), где count - количество полиномов.
-		@type count: int
-		@param count: Количество полиномов.
-		@type roots: vector<vector<complex<TEMPLATE>>>&
-		@param root: Вектор, который хранит корни уравнения.
-		@rtype: int*
-		@returns: Количество корней в каждом полиноме.
+		/** \brief Функтор для решения уравнения методом Baydoun.
+		 * 	\param poly Динамический массив размером (coun, 4), где count - количество полиномов.
+		 * 	\param count: Количество полиномов.
+		 * 	\param root Вектор, который хранит корни уравнения.
+		 * 	\return Количество корней в каждом полиноме.
 		*/
 		int* operator()(number **poly, int count,
 				vector<std::vector<complex<number>>> &roots){
@@ -355,16 +302,11 @@ namespace implementations{
 			return numbers;
 		}
 
-		/*
-		Функтор для решения уравнений методом Baydoun.
-		@type poly: TEMPLATE[][4]
-		@param a: Массив размером (coun, 4), где count - количество полиномов.
-		@type count: int
-		@param count: Количество полиномов.
-		@type roots: vector<vector<complex<TEMPLATE>>>&
-		@param root: Вектор, который хранит корни уравнения.
-		@rtype: int*
-		@returns: Количество корней в каждом полиноме.
+		/** \brief Функтор для решения уравнения методом Baydoun.
+		 * 	\param poly Массив размером (coun, 4), где count - количество полиномов.
+		 * 	\param count: Количество полиномов.
+		 * 	\param root Вектор, который хранит корни уравнения.
+		 * 	\return Количество корней в каждом полиноме.
 		*/
 		int* operator()(number poly[][4], int count,
 				vector<std::vector<complex<number>>> &roots){
@@ -379,10 +321,15 @@ namespace implementations{
 		}
 	};
 
+	/** \class Vieta
+	Имплементация Тригонометрической формулы Виеты \n
+	http://poivs.tsput.ru/ru/Math/Functions/Polynomials/VietaTrigonometricFormula\n
+	Пример использования:
 
-	/*
-	Имплементация Тригонометрической формулы Виеты
-	http://poivs.tsput.ru/ru/Math/Functions/Polynomials/VietaTrigonometricFormula
+		Vieta<fp_t> Solver; // - Создаст объект Solver, который будет принимать коэффициенты указанного типа fp_t.
+		int cnt = Solver(coefficients, roots); // Решит уравнение с коэффициентами, указанными в векторе coefficients,  roots - ссылка на вектор, в котором будут сохранены полученные корни.
+	
+	Функтор вернет int, в котором будет указано количество найденных корней.
 	*/
 	template <typename number>
 	class Vieta
@@ -396,13 +343,10 @@ namespace implementations{
 			else{ return 1;}
 		}
 
-		/*Вырожденный случай.
-		@type R: TEMPLATE
-		@param R: Вычисленное значение R.
-		@type b: TEMPLATE
-		@param b: Коэффициент x^2
-		@rtype: vector<complex<TEMPLATE>>
-		@returns: Вектор, хранящий корни уравнения.
+		/** \brief Вырожденный случай.
+		 * 	\param R Вычисленное значение R.
+		 * 	\param b Коэффициент x^2
+		 * 	\return Вектор, хранящий корни уравнения.
 		*/
 		inline vector<complex<number>> Degenerate(number R, number b, number inp2three){
 			vector<complex<number>> roots;
@@ -417,24 +361,18 @@ namespace implementations{
 			return roots;
 		}
 
-		/*Действительные корни.
-		@type Q: TEMPLATE
-		@param Q: Вычисленное значение Q.
-		@type Q3: TEMPLATE
-		@param Q3: Вычисленное значение Q^3.
-		@type R: TEMPLATE
-		@param R: Вычисленное значение R.
-		@type b: TEMPLATE
-		@param b: Коэффициент x^2
-		@rtype: vector<complex<TEMPLATE>>
-		@returns: Вектор, хранящий корни уравнения.
+		/** \brief Действительные корни.
+		 * 	\param Q Вычисленное значение Q.
+		 *	\param Q3 Вычисленное значение Q^3.
+		 *	\param R Вычисленное значение R.
+		 * 	\param b Коэффициент x^2
+		 * 	\return Вектор, хранящий корни уравнения.
 		*/
 		inline vector<complex<number>> Usual(number Q, number Q3, number R, number b, number inp2three){
 			vector<complex<number>> roots;
 			number x1,x2,x3 = 0;
 			number phi = acos(R/sqrt(Q3))*onethree;
 			number sqrtQ = static_cast<number>(-2)*sqrt(Q);
-			number pidiv3 = PI*onethree;
 			number half = static_cast<number>(0.5);
 			number _cos = cos(phi);
 			number _sin = sin(phi);
@@ -449,17 +387,12 @@ namespace implementations{
 			return roots;
 		}
 
-		/*Комплексные корни.
-		@type Q: TEMPLATE
-		@param Q: Вычисленное значение Q.
-		@type Q3: TEMPLATE
-		@param Q3: Вычисленное значение Q^3.
-		@type R: TEMPLATE
-		@param R: Вычисленное значение R.
-		@type b: TEMPLATE
-		@param b: Коэффициент x^2
-		@rtype: vector<complex<TEMPLATE>>
-		@returns: Вектор, хранящий корни уравнения.
+		/** \brief Комплексные корни.
+		 * 	\param Q Вычисленное значение Q.
+		 *	\param Q3 Вычисленное значение Q^3.
+		 *	\param R Вычисленное значение R.
+		 * 	\param b Коэффициент x^2
+		 * 	\return Вектор, хранящий корни уравнения.
 		*/
 		inline vector<complex<number>> Complex(number Q, number Q3, number R, number b, number inp2three){
 			vector<complex<number>> roots;
@@ -505,19 +438,13 @@ namespace implementations{
 			onethree = static_cast<number>(_onethree);
 		}
 
-		/*Функтор для решения уравнения методом Baydoun.
-		@type a: TEMPLATE
-		@param a: Коэффициент x^3.
-		@type b: TEMPLATE
-		@param b: Коэффициент x^2.
-		@type c: TEMPLATE
-		@param c: Коэффициент x.
-		@type d: TEMPLATE
-		@param d: Коэффициент C.
-		@type roots: vector<complex<TEMPLATE>>&
-		@param root: Вектор, который хранит корни уравнения.
-		@rtype: int
-		@returns: Количество корней.
+		/** \brief Функтор для решения уравнения методом Виета.
+		 * 	\param a Коэффициент x^3.
+		 * 	\param b Коэффициент x^2.
+		 * 	\param c Коэффициент x.
+		 * 	\param d Коэффициент C.
+		 * 	\param root: Вектор, который хранит корни уравнения.
+		 * 	\return Количество корней.
 		*/
 		int operator()(number a, number b, number c, number d,
 				vector<complex<number>> &roots){
@@ -554,15 +481,11 @@ namespace implementations{
 			}
 		}
 
-		/*Функтор для решения уравнения методом Виета.
-		@type inp: vector<TEMPLATE>&
-		@param a: Коэффициенты.
-		@type roots: vector<complex<TEMPLATE>>&
-		@param root: Вектор, который хранит корни уравнения.
-		@type reverse: bool
-		@param reverse: Необходимо ли рассматривать коэффициенты в обратном порядке
-		@rtype: int
-		@returns: Количество корней.
+		/** \brief Функтор для решения уравнения методом Виета.
+		 * 	\param inp Коэффициенты.
+		 * 	\param root Вектор, который хранит корни уравнения.
+		 * 	\param reverse Необходимо ли рассматривать коэффициенты в обратном порядке
+		 * 	\return Количество корней.
 		*/
 		int operator()(vector<number> &inp, std::vector<complex<number>> &roots, bool reverse=false){
 			return reverse ?
@@ -570,15 +493,11 @@ namespace implementations{
 				operator()(inp[0], inp[1], inp[2], inp[3], roots);
 		}
 
-		/*Функтор для решения уравнений методом Виета.
-		@type poly: TEMPLATE**
-		@param a: Динамический массив размером (coun, 4), где count - количество полиномов.
-		@type count: int
-		@param count: Количество полиномов.
-		@type roots: vector<vector<complex<TEMPLATE>>>&
-		@param root: Вектор, который хранит корни уравнения.
-		@rtype: int*
-		@returns: Количество корней в каждом полиноме.
+		/** \brief Функтор для решения уравнения методом Виета.
+		 * 	\param poly Динамический массив размером (coun, 4), где count - количество полиномов.
+		 * 	\param count: Количество полиномов.
+		 * 	\param root Вектор, который хранит корни уравнения.
+		 * 	\return Количество корней в каждом полиноме.
 		*/
 		int* operator()(number **poly, int count,
 				vector<std::vector<complex<number>>> &roots){
@@ -594,15 +513,11 @@ namespace implementations{
 			return numbers;
 		}
 
-		/*Функтор для решения уравнений методом Виета.
-		@type poly: TEMPLATE[][4]
-		@param a: Массив размером (coun, 4), где count - количество полиномов.
-		@type count: int
-		@param count: Количество полиномов.
-		@type roots: vector<vector<complex<TEMPLATE>>>&
-		@param root: Вектор, который хранит корни уравнения.
-		@rtype: int*
-		@returns: Количество корней в каждом полиноме.
+		/** \brief Функтор для решения уравнения методом Виета.
+		 * 	\param poly Массив размером (coun, 4), где count - количество полиномов.
+		 * 	\param count: Количество полиномов.
+		 * 	\param root Вектор, который хранит корни уравнения.
+		 * 	\return Количество корней в каждом полиноме.
 		*/
 		int* operator()(number poly[][4], int count,
 				vector<std::vector<complex<number>>> &roots){
