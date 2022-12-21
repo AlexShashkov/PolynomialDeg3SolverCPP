@@ -44,7 +44,10 @@ unsigned long long N_multiplicative_feedback_fired=0ULL;
 Nicolas Louvet, and Jean-Michel Muller, "Further Analysis of Kahan's Algorithm for the Accurate Computation of 2x2 Determinants".
 Mathematics of Computation, Vol. 82, No. 284, Oct. 2013, pp. 2245-2264 */
 template <typename fp_t> inline fp_t pr_product_difference(fp_t a, fp_t b, fp_t c, fp_t d)
-{ return std::fma(a, b, -d*c); }
+{
+  auto tmp = d * c;
+  return fma(a, b, -tmp) + fma(-d, c, tmp);
+}
 
 
 // Creates a test polynomial, both in the form of roots, e.g. (x-roots[0])*(x-roots[1])*(quadratic polynomial with no real roots)
