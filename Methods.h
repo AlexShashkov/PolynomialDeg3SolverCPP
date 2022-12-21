@@ -18,7 +18,8 @@ namespace implementations{
 
 	const long double _PI = std::numbers::pi_v<long double>;
 
-	/*Fused multiply-substract
+	/*
+	Fused multiply-substract
 	@type a: TEMPLATE
 	@type b: TEMPLATE
 	@type c: TEMPLATE
@@ -31,7 +32,8 @@ namespace implementations{
 		return fma(a, b, -tmp) + fma(-d, c, tmp);
 	}
 
-	/*Fused multiply-substract for complex numbers
+	/*
+	Fused multiply-substract for complex numbers
 	@type a: complex<TEMPLATE>
 	@type b: complex<TEMPLATE>
 	@type c: complex<TEMPLATE>
@@ -46,7 +48,8 @@ namespace implementations{
 		};
 	}
 
-	/*Fused multiply-add for complex numbers
+	/*
+	Fused multiply-add for complex numbers
 	@type a: complex<TEMPLATE>
 	@type b: complex<TEMPLATE>
 	@type c: complex<TEMPLATE>
@@ -61,7 +64,8 @@ namespace implementations{
 		};
 	}
 
-	/*Fused multiply-add for complex & real numbers
+	/*
+	Fused multiply-add for complex & real numbers
 	@type a: complex<TEMPLATE>
 	@type b: complex<TEMPLATE>
 	@type c: TEMPLATE
@@ -71,6 +75,43 @@ namespace implementations{
 	template <typename number>
 	inline complex<number> fma(std::complex<number> a, std::complex<number> b, number c){
 		return {std::fma(a.real(),b.real(),std::fma(-b.imag(),a.imag(),c)),fms(a.real(),b.imag(),-b.real(),a.imag())};
+	}
+
+	/*
+	Fused multiply-add for complex & real numbers
+	@type a: complex<TEMPLATE>
+	@type b: complex<TEMPLATE>
+	@type c: TEMPLATE
+	@returns: a*b+c
+	@rtype:  complex<TEMPLATE>
+	*/
+	template <typename number>
+	inline complex<number> fma(complex<number> a, number b, complex<number> c){
+		return {std::fma(a.real(),b,c.real()),std::fma(a.imag(),b,c.imag())};
+	}
+	/*
+	Fused multiply-add for complex & real numbers
+	@type a: complex<TEMPLATE>
+	@type b: complex<TEMPLATE>
+	@type c: TEMPLATE
+	@returns: a*b+c
+	@rtype:  complex<TEMPLATE>
+	*/
+	template <typename number>
+	inline complex<number> fma(number a,number b, complex<number> c){
+		return {std::fma(a,b,c.real()),c.imag()};
+	}
+	/*
+	Fused multiply-add for complex & real numbers
+	@type a: complex<TEMPLATE>
+	@type b: complex<TEMPLATE>
+	@type c: TEMPLATE
+	@returns: a*b+c
+	@rtype:  complex<TEMPLATE>
+	*/
+	template <typename number>
+	inline complex<number> fma(complex<number> a,number b,number c){
+		return {std::fma(a.real(),b,c),a.imag()*b};
 	}
 	
 
@@ -88,7 +129,8 @@ namespace implementations{
 		number sqrt3;
 		number cbrt4ftwo;
 
-		/*Аргумент комплексного числа. std::arg охватывает не все случаи
+		/*
+		Аргумент комплексного числа. std::arg охватывает не все случаи
 		@type inp: complex<TEMPLATE>
 		@param inp: Комплексное число.
 		@rtype: TEMPLATE
@@ -99,27 +141,13 @@ namespace implementations{
 			number y = std::imag(inp);
 			if(x > 0) return std::atan2(y, x);
 			else{
-				number _pi = y < 0 ? -_PI: _PI;
+				number _pi = y < 0 ? -PI: PI;
 				return x == 0 ? _pi/static_cast<number>(2) : std::atan2(y, x) + _pi;
 			}
 		}
 
-		/*Второй шаг из статьи для вычисления корней
-		@type b: TEMPLATE*
-		@param b: Массив, в котором хранятся коэффициенты x^2.
-		@type c: TEMPLATE*
-		@param c: Массив, в котором хранятся коэффициенты x.
-		@type d: TEMPLATE*
-		@param d: Массив, в котором хранятся коэффициенты C.
-		@rtype: vector<complex<TEMPLATE>>
-		@returns: Корни уравнения.
-		*/
-		inline vector<complex<number>> part2(number *b, number *c, number *d,
-				number o, number r, number bthree, number tmp1){
-			
-		}
-
-		/*Начало вычисления.
+		/*
+		Начало вычисления.
 		@type b: TEMPLATE*
 		@param b: Массив, в котором хранятся коэффициенты x^2.
 		@type c: TEMPLATE*
@@ -137,11 +165,12 @@ namespace implementations{
 			number c0 = c[0];
 
 			number tmp1 = std::fma(static_cast<number>(2)*b0,c0,static_cast<number>(-3)*d0);
-
+			// На основе o и r выявляется тип многочлена
 			number o = std::fma(-b[1],std::fma(static_cast<number>(4)*b0,d0,-c[1]),fms(static_cast<number>(9)*d0,tmp1, static_cast<number>(4),c[2]));
 			number r = std::fma(one27,fms(static_cast<number>(2), b[2], static_cast<number>(9), b0*c0),d0);
 			number bthree = b0*onethree;
 
+			// Вырожденный случай
 			if(o == 0 && r == 0){
 				roots = vector<complex<number>>{-bthree, -bthree, -bthree};
 				return 3;
@@ -165,26 +194,26 @@ namespace implementations{
 				number b0c1 = b0*c1;
 				number b1c1 = b1*c1;
 
-				number t = fms(c2, fms(static_cast<number>(2), std::fma(static_cast<number>(12)*d0, 
-					fms(static_cast<number>(3), d0, static_cast<number>(-11), b2), std::fma(static_cast<number>(8), b[5], c2)),
-					static_cast<number>(66)*b0c0, (tmp+d0)), static_cast<number>(12)*b[3]*c0, std::fma(static_cast<number>(7),c2,-d1)) + \
-					fms(d[2], fms(static_cast<number>(2)*b0, std::fma(static_cast<number>(72), c0, -b1),static_cast<number>(27),d0),
+				// Связано с комплексным многолченом в терминах его коэффициентов
+				number t = fms(c2, fms(static_cast<number>(2), fma(static_cast<number>(12)*d0, 
+					fms(static_cast<number>(3), d0, static_cast<number>(-11), b2), fma(static_cast<number>(8), b[5], c2)),
+					static_cast<number>(66)*b0c0, (tmp+d0)), static_cast<number>(12)*b[3]*c0, fma(static_cast<number>(7),c2,-d1)) + \
+					fms(d[2], fms(static_cast<number>(2)*b0, fma(static_cast<number>(72), c0, -b1),static_cast<number>(27),d0),
 					b1c1, d0*static_cast<number>(3)*fms(static_cast<number>(8), b2, static_cast<number>(-97),d0));
-				number partiond0 = std::fma(tmp,fms(static_cast<number>(14)*b0,c1,static_cast<number>(4)*b2,c0),fms(static_cast<number>(14)*b0c1,d0,static_cast<number>(12)*c0,d1))+ std::fma(b1,d1,c[3]);
+				number partiond0 = fma(tmp,fms(static_cast<number>(14)*b0,c1,static_cast<number>(4)*b2,c0),fms(static_cast<number>(14)*b0c1,d0,static_cast<number>(12)*c0,d1)) + fma(b1,d1,c[3]);
+				
 				complex<number> sqrt1 = o >= 0 ? sqrt(o) : complex<number>(0, 1)*static_cast<number>(sqrt(fabs(o)));
 				complex<number> sqrt2 = std::complex<number>(0, 1)*sqrt3;
 				complex<number> sqrt2div3 = sqrt2*onethree;
 				complex<number> sqrt2div9 = sqrt2div3*onethree;
 
-				complex<number> bl = tmp * sqrt1 * std::fma(static_cast<number>(4)*b0c0,-tmp,std::fma(static_cast<number>(2),c2,d1)) + sqrt2div9*t;
+				complex<number> bl = fma(sqrt1,tmp * fma(static_cast<number>(4)*b0c0,-tmp, fma(static_cast<number>(2),c2,d1)), sqrt2div9*t);
 				complex<number> bl1 = pow(bl, onethree);
 				complex<number> bl2 = pow(bl1, static_cast<number>(2));
-				complex<number> A1 = (-sqrt2div3)*static_cast<number>(2)*std::fma(b1,std::fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15), c0*d0, static_cast<number>(13),b0c1)) + static_cast<number>(2)*c0*sqrt1;
-				complex<number> A2 = fms(static_cast<number>(2)*b1*d0, fms(b0, d0, static_cast<number>(-58), c1), static_cast<number>(8)*b2,
-					fms(b0c0, tmp, static_cast<number>(-5), c2)) + \
-					fms(b0c0, fms(static_cast<number>(23), c2, static_cast<number>(99), d1), static_cast<number>(-3)*d0, fms(static_cast<number>(9), d1, 
-					static_cast<number>(7),c2)) - sqrt1*sqrt2 *std::fma(static_cast<number>(2)*b0c0,fms(static_cast<number>(4),b0c0,static_cast<number>(5),d0),
-					std::fma(static_cast<number>(3),d1,c2));
+				complex<number> A1 = fma(-sqrt2div3,static_cast<number>(2)*fma(b1, fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15), c0*d0, static_cast<number>(13),b0c1)),static_cast<number>(2)*c0*sqrt1); 
+				complex<number> A2 = fma(- sqrt1,sqrt2 *fma(static_cast<number>(2)*b0c0,fms(static_cast<number>(4),b0c0,static_cast<number>(5),d0), fma(static_cast<number>(3),d1,c2)),fma(static_cast<number>(1),
+					fms(static_cast<number>(2)*b1*d0, fms(b0, d0, static_cast<number>(-58), c1), static_cast<number>(8)*b2,fms(b0c0, tmp, static_cast<number>(-5), c2)),fms(b0c0, fms(static_cast<number>(23), c2, static_cast<number>(99), d1),
+					static_cast<number>(-3)*d0, fms(static_cast<number>(9), d1, static_cast<number>(7),c2))));
 				complex<number>  Rbase = sqrt1 * sqrt2div9;
 				complex<number> R1, R2;
 				if (o == 0)
@@ -232,7 +261,8 @@ namespace implementations{
 			cbrt4ftwo = static_cast<number>(pow(4L, _onethree)*static_cast<number>(0.5));
 		}
 
-		/*Функтор для решения уравнения методом Baydoun.
+		/*
+		Функтор для решения уравнения методом Baydoun.
 		@type a: TEMPLATE
 		@param a: Коэффициент x^3.
 		@type b: TEMPLATE
@@ -285,7 +315,8 @@ namespace implementations{
 			return result;
 		}
 
-		/*Функтор для решения уравнения методом Baydoun.
+		/*
+		Функтор для решения уравнения методом Baydoun.
 		@type inp: vector<TEMPLATE>&
 		@param a: Коэффициенты.
 		@type roots: vector<complex<TEMPLATE>>&
@@ -301,7 +332,8 @@ namespace implementations{
 				operator()(inp[0], inp[1], inp[2], inp[3], roots);
 		}
 
-		/*Функтор для решения уравнений методом Baydoun.
+		/*
+		Функтор для решения уравнений методом Baydoun.
 		@type poly: TEMPLATE**
 		@param a: Динамический массив размером (coun, 4), где count - количество полиномов.
 		@type count: int
@@ -323,7 +355,8 @@ namespace implementations{
 			return numbers;
 		}
 
-		/*Функтор для решения уравнений методом Baydoun.
+		/*
+		Функтор для решения уравнений методом Baydoun.
 		@type poly: TEMPLATE[][4]
 		@param a: Массив размером (coun, 4), где count - количество полиномов.
 		@type count: int
@@ -355,7 +388,6 @@ namespace implementations{
 	class Vieta
 	{
 		const number PI = static_cast<number>(_PI);
-		number pi2div3;
 		number sqrt3;
 		number onethree;
 
@@ -402,9 +434,14 @@ namespace implementations{
 			number x1,x2,x3 = 0;
 			number phi = acos(R/sqrt(Q3))*onethree;
 			number sqrtQ = static_cast<number>(-2)*sqrt(Q);
-			x1 = std::fma(sqrtQ,cos(phi),-inp2three);
-			x2 = std::fma(sqrtQ,cos(phi+pi2div3),-inp2three);
-			x3 = std::fma(sqrtQ,cos(phi-pi2div3),-inp2three);
+			number pidiv3 = PI*onethree;
+			number half = static_cast<number>(0.5);
+			number _cos = cos(phi);
+			number _sin = sin(phi);
+
+			x1 = fma(sqrtQ, _cos, -inp2three);
+			x2 = fma(sqrtQ, fms(-sqrt3*half, _sin, half, _cos), -inp2three); // сos(a+b) = cos(a) * cos(b)- sin(a)*sin(b)
+			x3 = fma(sqrtQ, fms(sqrt3*half,  _sin, half, _cos), -inp2three); // cos(a-b) = cos(a) * cos(b) + sin(a) * sin(b)
 			roots = {x1, x2, x3};
 			for (auto &r: roots) {
 				if(fabs(r.imag()) < fabs(r)*std::numeric_limits<number>::epsilon()) r.imag(0);
@@ -461,11 +498,9 @@ namespace implementations{
 		}
 	public:
 		Vieta(){
-			long double _pi2div3 = 2L*_PI/3L;
 			long double _sqrt3 = sqrt(3L);
 			long double _onethree = 1.0L/3.0L;
 
-			pi2div3 = static_cast<number>(_pi2div3);
 			sqrt3 = static_cast<number>(_sqrt3);
 			onethree = static_cast<number>(_onethree);
 		}
