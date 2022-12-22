@@ -154,16 +154,14 @@ namespace implementations{
 				
 				number tmp = std::fma(-b0,c0,d0);
 
-				number b0c0 = -tmp + d0;
+				number b0c0 = b0*c0;
 				number b0c1 = b0*c1;
 				number b1c1 = b1*c1;
 
 				// Связано с комплексным многолченом в терминах его коэффициентов
-				number t = fms(c2, fms(static_cast<number>(2), fma(static_cast<number>(12)*d0, 
-					fms(static_cast<number>(3), d0, static_cast<number>(-11), b2), fma(static_cast<number>(8), b[5], c2)),
-					static_cast<number>(66)*b0c0, (tmp+d0)), static_cast<number>(12)*b[3]*c0, fma(static_cast<number>(7),c2,-d1)) + \
-					fms(d[2], fms(static_cast<number>(2)*b0, fma(static_cast<number>(72), c0, -b1),static_cast<number>(27),d0),
-					b1c1, d0*static_cast<number>(3)*fms(static_cast<number>(8), b2, static_cast<number>(-97),d0));
+				number t = fma(static_cast<number>(2)*c2, fma(static_cast<number>(33)*b0,fms(static_cast<number>(4)*b1, d0,-c0, fma(static_cast<number>(-2), d0, b0c0)), fma(static_cast<number>(4),
+					fms(static_cast<number>(2),b[5],static_cast<number>(-9),d1),c2)), fma(d[2],(fma(static_cast<number>(-2),b2,static_cast<number>(9)* \
+					fms(static_cast<number>(16), b0c0,static_cast<number>(3), d0))), fms(static_cast<number>(12)*b[3]*c0, fma(-static_cast<number>(7),c2,d1), b1c1*d0,fms(static_cast<number>(24),b2,static_cast<number>(-291),d0))));
 				number partiond0 = fma(tmp,fms(static_cast<number>(14)*b0,c1,static_cast<number>(4)*b2,c0),fms(static_cast<number>(14)*b0c1,d0,static_cast<number>(12)*c0,d1)) + fma(b1,d1,c[3]);
 				
 				complex<number> sqrt1 = o >= 0 ? sqrt(o) : complex<number>(0, 1)*static_cast<number>(sqrt(fabs(o)));
