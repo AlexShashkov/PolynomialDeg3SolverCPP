@@ -1,5 +1,5 @@
-// g++ framework.cpp Methods.h -DMETHOD="Baydoun<fp_t> Solver" -DNTESTS=100000 -o Baydoun -std=c++20
-// g++ framework.cpp Methods.h -DMETHOD="Vieta<fp_t> Solver" -DNTESTS=100000 -o Vieta -std=c++20
+// g++ framework.cpp Methods.h -DMETHOD="Baydoun" -DNTESTS=100000 -o Baydoun -std=c++20
+// g++ framework.cpp Methods.h -DMETHOD="Vieta" -DNTESTS=100000 -o Vieta -std=c++20
 
 #ifndef POLYROOTS1234_HPP
 #define POLYROOTS1234_HPP
@@ -26,7 +26,7 @@ using namespace implementations;
 #define PR_DISCRIMINANT_USE_FMA_NORMALIZED                    3
 
 #ifndef METHOD
-#define METHOD Baydoun<fp_t> Solver
+#define METHOD Baydoun
 #endif
 
 #ifndef NTESTS
@@ -319,7 +319,7 @@ unsigned long long n_test;
 N_additive_feedback_fired=0ULL; N_multiplicative_feedback_fired=0ULL;
 
 // Baydoun or Vieta, based on make build
-METHOD;
+METHOD<fp_t> Solver;
 
 if (test_for_precision) // check correctness
   {

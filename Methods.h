@@ -234,40 +234,64 @@ namespace implementations{
 		int operator()(number a, number b, number c, number d,
 				vector<complex<number>> &roots){
 			// x^3, x^2, x, c
-			if(a != 0 && std::isfinite(a)){
-				b /= a;
-				c /= a;
-				d /= a;
-				a = 1;
-			}
-			else throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
-
 			number *_b = new number[6];
 			number *_c = new number[4];
 			number *_d = new number[3];
-			_b[0] = b; _c[0] = c; _d[0] = d;
-			number bcopy = b;
-			number ccopy = c;
-			number dcopy = d;
+			int result = 0;
+			try{
+				if(a != 0 && std::isfinite(a)){
+					b /= a;
+					c /= a;
+					d /= a;
+					a = 1;
+				}
+				else throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
+				_b[0] = b; _c[0] = c; _d[0] = d;
+				number bcopy = b;
+				number ccopy = c;
+				number dcopy = d;
 
-			for (int i = 1; i < 6; i++){
-				bcopy *= b;
-				_b[i] = bcopy;
+				for (int i = 1; i < 6; i++){
+					bcopy *= b;
+					_b[i] = bcopy;
+				}
+				for (int i = 1; i < 4; i++){
+					ccopy *= c;
+					_c[i] = ccopy;
+				}
+				for (int i = 1; i < 3; i++){
+					dcopy *= d;
+					_d[i] = dcopy;
+				}
+				result = solve(_b, _c, _d, roots);
+				delete[] _b;
+				delete[] _c;
+				delete[] _d;
+				return result;
 			}
-			for (int i = 1; i < 4; i++){
-				ccopy *= c;
-				_c[i] = ccopy;
+			catch(const std::invalid_argument &err){
+				std::cerr << "Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
+				std::cerr << "Invalid argument was passed: " << err.what();
+				delete[] _b;
+				delete[] _c;
+				delete[] _d;
+				return result;
 			}
-			for (int i = 1; i < 3; i++){
-				dcopy *= d;
-				_d[i] = dcopy;
+			catch(const std::out_of_range &err){
+				std::cerr << "Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
+				std::cerr << "Out of range: " << err.what();
+				delete[] _b;
+				delete[] _c;
+				delete[] _d;
+				return result;
 			}
-
-			int result = solve(_b, _c, _d, roots);
-			delete[] _b;
-			delete[] _c;
-			delete[] _d;
-			return result;
+			catch(...){
+				std::cerr << "!!! Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
+				delete[] _b;
+				delete[] _c;
+				delete[] _d;
+				return result;
+			}
 		}
 
 		/** \brief Функтор для решения уравнения методом Baydoun.
@@ -447,35 +471,51 @@ namespace implementations{
 		int operator()(number a, number b, number c, number d,
 				vector<complex<number>> &roots){
 			// x^3, x^2, x, c
-			if(a != 0 && std::isfinite(a)){
-				b /= a;
-				c /= a;
-				d /= a;
-				a = 1;
-			}
-			else throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
-
-			number b_onethree = b*onethree;
-			auto Q = fms(b_onethree,b_onethree,c,onethree);
-			if(Q == 0 || !std::isfinite(Q)){
-				number rs = -b_onethree;
-				roots = {rs, rs, rs};
-				return 3;
-			}
-			else{
-				number R = std::fma(static_cast<number>(0.5), std::fma(-c, b_onethree, d), pow(b_onethree, 3));
-				auto Q3 = Q*Q*Q;
-				auto S = std::fma(-R,R,Q3);
-				if(S==0 || !std::isfinite(S)){
-					roots = Degenerate(R, b, b_onethree);
+			try{
+				if(a != 0 && std::isfinite(a)){
+					b /= a;
+					c /= a;
+					d /= a;
+					a = 1;
 				}
-				else if(S > 0){
-					roots = Usual(Q, Q3, R, b, b_onethree);
+				else throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
+
+				number b_onethree = b*onethree;
+				auto Q = fms(b_onethree,b_onethree,c,onethree);
+				if(Q == 0 || !std::isfinite(Q)){
+					number rs = -b_onethree;
+					roots = {rs, rs, rs};
+					return 3;
 				}
 				else{
-					roots = Complex(Q, Q3, R, b, b_onethree);
+					number R = std::fma(static_cast<number>(0.5), std::fma(-c, b_onethree, d), pow(b_onethree, 3));
+					auto Q3 = Q*Q*Q;
+					auto S = std::fma(-R,R,Q3);
+					if(S==0 || !std::isfinite(S)){
+						roots = Degenerate(R, b, b_onethree);
+					}
+					else if(S > 0){
+						roots = Usual(Q, Q3, R, b, b_onethree);
+					}
+					else{
+						roots = Complex(Q, Q3, R, b, b_onethree);
+					}
+					return roots.size();
 				}
-				return roots.size();
+			}
+			catch(const std::invalid_argument &err){
+				std::cerr << "Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
+				std::cerr << "Invalid argument was passed: " << err.what();
+				return 0;
+			}
+			catch(const std::out_of_range &err){
+				std::cerr << "Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
+				std::cerr << "Out of range: " << err.what();
+				return 0;
+			}
+			catch(...){
+				std::cerr << "!!! Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
+				return 0;
 			}
 		}
 
