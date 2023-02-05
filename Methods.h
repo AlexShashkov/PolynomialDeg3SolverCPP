@@ -21,7 +21,7 @@ namespace implementations{
     template<typename ... T>
     inline bool anynotfinite(T && ... t)
     {
-        return ((std::isinf(t) || std::isnan(t)) || ...);
+        return ((!std::isfinite(t)) || ...);
     }
 
 	/** \brief Sign
@@ -103,23 +103,36 @@ namespace implementations{
     void KahanQuadratic(number a, number b, number c, vector<complex<number>> &roots){
         // x^2, x, c
         //Coefficients should be in CBA order
-        b = b/static_cast<number>(-2);
-        if(!std::isfinite(a)) throw std::invalid_argument("Коэффициент при x^2 равен нулю или б/м.");
-        if(!std::isfinite(b)) throw std::invalid_argument("Коэффициент при x равен нулю или б/м.");
-        number p = b*b;
-        number q = a*c;
-        //Use the hardware's FMA
-        number dp = fma(b,b,-p);
-        number dq = fma(a,c,-q);
-        // дискриминант
-        number d = (p-q) + (dp - dq);
-        d = std::max(d,static_cast<number>(0.L));
-        number S = b;
-        S = std::sqrt(d)*(sign(S) + (S==0)) + S;
-        number Z1 = S/a;
-        number Z2 = c/S;
+        try{
+            b = b/static_cast<number>(-2);
+            if(!std::isfinite(a)) throw std::invalid_argument("Коэффициент при x^2 равен нулю или б/м.");
+            if(!std::isfinite(b)) throw std::invalid_argument("Коэффициент при x равен нулю или б/м.");
+            number p = b*b;
+            number q = a*c;
+            //Use the hardware's FMA
+            number dp = fma(b,b,-p);
+            number dq = fma(a,c,-q);
+            // дискриминант
+            number d = (p-q) + (dp - dq);
+            d = std::max(d,static_cast<number>(0));
+            number S = b;
+            S = std::sqrt(d)*(sign(S) + (S==0)) + S;
+            number Z1 = S/a;
+            number Z2 = c/S;
 
-        roots = {Z1, Z2};
+            roots = {Z1, Z2};
+        }
+        catch(const std::invalid_argument &err){
+            std::cerr << "Error occured while working with " << a << " " << b << " " << c << " " << "\n";
+            std::cerr << "Invalid argument was passed: " << err.what();
+        }
+        catch(const std::out_of_range &err){
+            std::cerr << "Error occured while working with " << a << " " << b << " " << c << " " << "\n";
+            std::cerr << "Out of range: " << err.what();
+        }
+        catch(...){
+            std::cerr << "!!! Error occured while working with " << a << " " << b << " " << c << " " << "\n";
+        }
     }
 
 	/** \brief Случай для одного корня \n
@@ -127,8 +140,13 @@ namespace implementations{
 	template <typename number>
     void simpleEquation(number a, number b, vector<complex<number>> &roots){
         // x, c
-        if(!std::isfinite(a)) throw std::invalid_argument("Коэффициент при x или c равен нулю или б/м.");
-        roots = {b/a};
+        number res = b/a;
+        if(anynotfinite(a, b, res)){
+            std::cerr << "Error occured while working with " << a << " " << b << " " << res << "\n";
+            std::cerr << "Invalid argument was passed\n";
+            return;
+        }
+        roots = {res};
     }
 
 	/** \class Baydoun
