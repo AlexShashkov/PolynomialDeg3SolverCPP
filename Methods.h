@@ -16,14 +16,20 @@ namespace implementations{
     using std::vector;
 	using std::fma;
 
-	const long double _PI = std::numbers::pi_v<long double>;
+	/** \brief Check if at least one number is not finite
+	*/
+    template<typename ... T>
+    inline bool anynotfinite(T && ... t)
+    {
+        return ((std::isinf(t) || std::isnan(t)) || ...);
+    }
 
 	/** \brief Fused multiply-substract
 	*/
 	template <typename number>
 	inline number fms(number a, number b, number c, number d) {
-		auto tmp = d * c;
-		return fma(a, b, -tmp) + fma(-d, c, tmp);
+		auto tmp = -d * c;
+		return fma(a, b, tmp) + fma(d, c, tmp);
 	}
 
 	/** \brief Fused multiply-substract for complex numbers
@@ -95,7 +101,8 @@ namespace implementations{
 	template <typename number>
 	class Baydoun
 	{
-		const number PI = static_cast<number>(_PI);
+		// const number PI = static_cast<number>(_PI);
+        const number PI = std::numbers::pi_v<number>;
 		number onethree;
 		number one27;
 		number sqrt3;
@@ -239,13 +246,12 @@ namespace implementations{
 			number *_d = new number[3];
 			int result = 0;
 			try{
-				if(a != 0 && std::isfinite(a)){
-					b /= a;
-					c /= a;
-					d /= a;
-					a = 1;
-				}
-				else throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
+				// if(a != 0 && std::isfinite(a)){
+                b /= a;
+                c /= a;
+                d /= a;
+                a = 1;
+				if(anynotfinite(b, c, d)) throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
 				_b[0] = b; _c[0] = c; _d[0] = d;
 				number bcopy = b;
 				number ccopy = c;
@@ -356,7 +362,8 @@ namespace implementations{
 	template <typename number>
 	class Vieta
 	{
-		const number PI = static_cast<number>(_PI);
+		// const number PI = static_cast<number>(_PI);
+        const number PI = std::numbers::pi_v<number>;
 		number sqrt3;
 		number onethree;
 
@@ -427,7 +434,6 @@ namespace implementations{
 			number sqrtabsQ3 = sqrt(fabs(Q3));
 			number sqrtabsQ = sqrt(fabs(Q));
 
-			// Q может быть не б/м, но корень может быть еще меньше
 			if(sqrtabsQ3 == 0 || !std::isfinite(sqrtabsQ3)){
 				return {-inp2three, -inp2three, -inp2three};
 			}
@@ -453,11 +459,8 @@ namespace implementations{
 		}
 	public:
 		Vieta(){
-			long double _sqrt3 = sqrt(3L);
-			long double _onethree = 1.0L/3.0L;
-
-			sqrt3 = static_cast<number>(_sqrt3);
-			onethree = static_cast<number>(_onethree);
+			number sqrt3 = sqrt(3.0);
+			number onethree = 1.0/3.0;
 		}
 
 		/** \brief Функтор для решения уравнения методом Виета.
@@ -472,13 +475,11 @@ namespace implementations{
 				vector<complex<number>> &roots){
 			// x^3, x^2, x, c
 			try{
-				if(a != 0 && std::isfinite(a)){
-					b /= a;
-					c /= a;
-					d /= a;
-					a = 1;
-				}
-				else throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
+                b /= a;
+                c /= a;
+                d /= a;
+                a = 1;
+				if(anynotfinite(b, c, d)) throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
 
 				number b_onethree = b*onethree;
 				auto Q = fms(b_onethree,b_onethree,c,onethree);
@@ -489,7 +490,7 @@ namespace implementations{
 				}
 				else{
 					number R = std::fma(static_cast<number>(0.5), std::fma(-c, b_onethree, d), pow(b_onethree, 3));
-					auto Q3 = Q*Q*Q;
+					auto Q3 = pow(Q, 3.0);
 					auto S = std::fma(-R,R,Q3);
 					if(S==0 || !std::isfinite(S)){
 						roots = Degenerate(R, b, b_onethree);
