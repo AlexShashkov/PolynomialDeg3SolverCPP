@@ -24,6 +24,14 @@ namespace implementations{
         return ((std::isinf(t) || std::isnan(t)) || ...);
     }
 
+	/** \brief Sign
+	*/
+	template <typename number>
+    inline int sign(number val) {
+        if( number(0) < val){ return -1; }
+        else{ return 1;}
+    }
+
 	/** \brief Fused multiply-substract
 	*/
 	template <typename number>
@@ -84,7 +92,44 @@ namespace implementations{
 	inline complex<number> fma(complex<number> a,number b, number c){
 		return {std::fma(a.real(),b,c),a.imag()*b};
 	}
-	
+
+	/** \brief Имплементация 'On the Cost of Floating-Point Computation Without Extra-Precise Arithmetic' \n
+    Взято из https://github.com/KMBO19MCCO/qdrtcsKahanWepa \n
+	\author Prof. W. Kahan
+
+	Статья: https://people.eecs.berkeley.edu/~wkahan/Qdrtcs.pdf \n
+	*/
+	template <typename number>
+    void KahanQuadratic(number a, number b, number c, vector<complex<number>> &roots){
+        // x^2, x, c
+        //Coefficients should be in CBA order
+        b = b/static_cast<number>(-2);
+        if(!std::isfinite(a)) throw std::invalid_argument("Коэффициент при x^2 равен нулю или б/м.");
+        if(!std::isfinite(b)) throw std::invalid_argument("Коэффициент при x равен нулю или б/м.");
+        number p = b*b;
+        number q = a*c;
+        //Use the hardware's FMA
+        number dp = fma(b,b,-p);
+        number dq = fma(a,c,-q);
+        // дискриминант
+        number d = (p-q) + (dp - dq);
+        d = std::max(d,static_cast<number>(0.L));
+        number S = b;
+        S = std::sqrt(d)*(sign(S) + (S==0)) + S;
+        number Z1 = S/a;
+        number Z2 = c/S;
+
+        roots = {Z1, Z2};
+    }
+
+	/** \brief Случай для одного корня \n
+	*/
+	template <typename number>
+    void simpleEquation(number a, number b, vector<complex<number>> &roots){
+        // x, c
+        if(!std::isfinite(a)) throw std::invalid_argument("Коэффициент при x или c равен нулю или б/м.");
+        roots = {b/a};
+    }
 
 	/** \class Baydoun
 	Имплементация 'Analytical formula for the roots of the general complex cubic polynomial' \n
@@ -234,17 +279,15 @@ namespace implementations{
 		 * 	\param a Коэффициент x^3.
 		 * 	\param b Коэффициент x^2.
 		 * 	\param c Коэффициент x.
-		 * 	\param d Коэффициент C.
+	\param d Коэффициент C.
 		 * 	\param root: Вектор, который хранит корни уравнения.
-		 * 	\return Количество корней.
 		*/
-		int operator()(number a, number b, number c, number d,
+		void operator()(number a, number b, number c, number d,
 				vector<complex<number>> &roots){
 			// x^3, x^2, x, c
 			number *_b = new number[6];
 			number *_c = new number[4];
 			number *_d = new number[3];
-			int result = 0;
 			try{
 				// if(a != 0 && std::isfinite(a)){
                 b /= a;
@@ -269,11 +312,10 @@ namespace implementations{
 					dcopy *= d;
 					_d[i] = dcopy;
 				}
-				result = solve(_b, _c, _d, roots);
+				solve(_b, _c, _d, roots);
 				delete[] _b;
 				delete[] _c;
 				delete[] _d;
-				return result;
 			}
 			catch(const std::invalid_argument &err){
 				std::cerr << "Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
@@ -281,7 +323,6 @@ namespace implementations{
 				delete[] _b;
 				delete[] _c;
 				delete[] _d;
-				return result;
 			}
 			catch(const std::out_of_range &err){
 				std::cerr << "Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
@@ -289,14 +330,12 @@ namespace implementations{
 				delete[] _b;
 				delete[] _c;
 				delete[] _d;
-				return result;
 			}
 			catch(...){
 				std::cerr << "!!! Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
 				delete[] _b;
 				delete[] _c;
 				delete[] _d;
-				return result;
 			}
 		}
 
@@ -304,48 +343,23 @@ namespace implementations{
 		 * 	\param inp Коэффициенты.
 		 * 	\param root Вектор, который хранит корни уравнения.
 		 * 	\param reverse Необходимо ли рассматривать коэффициенты в обратном порядке
-		 * 	\return Количество корней.
 		*/
-		int operator()(vector<number> &inp, std::vector<complex<number>> &roots, bool reverse=false){
-			return reverse ?
-				operator()(inp[3], inp[2], inp[1], inp[0], roots):
-				operator()(inp[0], inp[1], inp[2], inp[3], roots);
-		}
-
-		/** \brief Функтор для решения уравнения методом Baydoun.
-		 * 	\param poly Динамический массив размером (coun, 4), где count - количество полиномов.
-		 * 	\param count: Количество полиномов.
-		 * 	\param root Вектор, который хранит корни уравнения.
-		 * 	\return Количество корней в каждом полиноме.
-		*/
-		int* operator()(number **poly, int count,
-				vector<std::vector<complex<number>>> &roots){
-			// x^3, x^2, x, c
-			int *numbers = new int[count];
-			for(int i = 0; i < count; i++){
-				vector<complex<number>> res;
-				numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
-				roots.push_back(res);
-			}
-			return numbers;
-		}
-
-		/** \brief Функтор для решения уравнения методом Baydoun.
-		 * 	\param poly Массив размером (coun, 4), где count - количество полиномов.
-		 * 	\param count: Количество полиномов.
-		 * 	\param root Вектор, который хранит корни уравнения.
-		 * 	\return Количество корней в каждом полиноме.
-		*/
-		int* operator()(number poly[][4], int count,
-				vector<std::vector<complex<number>>> &roots){
-			// x^3, x^2, x, c
-			int *numbers = new int[count];
-			for(int i = 0; i < count; i++){
-				vector<complex<number>> res;
-				numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
-				roots.push_back(res);
-			}
-			return numbers;
+		void operator()(vector<number> &inp, std::vector<complex<number>> &roots, bool reverse=false){
+            if(inp.size() == 2){
+                reverse ?
+                    simpleEquation(inp[1], inp[0], roots):
+                    simpleEquation(inp[0], inp[1], roots);
+            }
+            if(inp.size() == 3){
+                reverse ?
+                    KahanQuadratic(inp[2], inp[1], inp[0], roots):
+                    KahanQuadratic(inp[0], inp[1], inp[2], roots);
+            }
+            else{
+                reverse ?
+                    operator()(inp[3], inp[2], inp[1], inp[0], roots):
+                    operator()(inp[0], inp[1], inp[2], inp[3], roots);
+            }
 		}
 	};
 
@@ -367,10 +381,6 @@ namespace implementations{
 		number sqrt3;
 		number onethree;
 
-		inline int sign(number val) {
-			if( number(0) < val){ return -1; }
-			else{ return 1;}
-		}
 
 		/** \brief Вырожденный случай.
 		 * 	\param R Вычисленное значение R.
@@ -469,9 +479,8 @@ namespace implementations{
 		 * 	\param c Коэффициент x.
 		 * 	\param d Коэффициент C.
 		 * 	\param root: Вектор, который хранит корни уравнения.
-		 * 	\return Количество корней.
 		*/
-		int operator()(number a, number b, number c, number d,
+		void operator()(number a, number b, number c, number d,
 				vector<complex<number>> &roots){
 			// x^3, x^2, x, c
 			try{
@@ -486,7 +495,6 @@ namespace implementations{
 				if(Q == 0 || !std::isfinite(Q)){
 					number rs = -b_onethree;
 					roots = {rs, rs, rs};
-					return 3;
 				}
 				else{
 					number R = std::fma(static_cast<number>(0.5), std::fma(-c, b_onethree, d), pow(b_onethree, 3));
@@ -501,22 +509,18 @@ namespace implementations{
 					else{
 						roots = Complex(Q, Q3, R, b, b_onethree);
 					}
-					return roots.size();
 				}
 			}
 			catch(const std::invalid_argument &err){
 				std::cerr << "Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
 				std::cerr << "Invalid argument was passed: " << err.what();
-				return 0;
 			}
 			catch(const std::out_of_range &err){
 				std::cerr << "Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
 				std::cerr << "Out of range: " << err.what();
-				return 0;
 			}
 			catch(...){
 				std::cerr << "!!! Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
-				return 0;
 			}
 		}
 
@@ -524,52 +528,23 @@ namespace implementations{
 		 * 	\param inp Коэффициенты.
 		 * 	\param root Вектор, который хранит корни уравнения.
 		 * 	\param reverse Необходимо ли рассматривать коэффициенты в обратном порядке
-		 * 	\return Количество корней.
 		*/
-		int operator()(vector<number> &inp, std::vector<complex<number>> &roots, bool reverse=false){
-			return reverse ?
-				operator()(inp[3], inp[2], inp[1], inp[0], roots):
-				operator()(inp[0], inp[1], inp[2], inp[3], roots);
-		}
-
-		/** \brief Функтор для решения уравнения методом Виета.
-		 * 	\param poly Динамический массив размером (coun, 4), где count - количество полиномов.
-		 * 	\param count: Количество полиномов.
-		 * 	\param root Вектор, который хранит корни уравнения.
-		 * 	\return Количество корней в каждом полиноме.
-		*/
-		int* operator()(number **poly, int count,
-				vector<std::vector<complex<number>>> &roots){
-			// x^3, x^2, x, c
-			int *numbers = new int[count];
-
-			vector<complex<number>> res;
-			for(int i = 0; i < count; i++){
-				numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
-				roots.push_back(res);
-				res.clear();
-			}
-			return numbers;
-		}
-
-		/** \brief Функтор для решения уравнения методом Виета.
-		 * 	\param poly Массив размером (coun, 4), где count - количество полиномов.
-		 * 	\param count: Количество полиномов.
-		 * 	\param root Вектор, который хранит корни уравнения.
-		 * 	\return Количество корней в каждом полиноме.
-		*/
-		int* operator()(number poly[][4], int count,
-				vector<std::vector<complex<number>>> &roots){
-			// x^3, x^2, x, c
-			int *numbers = new int[count];
-			vector<complex<number>> res;
-			for(int i = 0; i < count; i++){
-				numbers[i] = operator()(poly[i][0], poly[i][1], poly[i][2], poly[i][3], res);
-				roots.push_back(res);
-				res.clear();
-			}
-			
-			return numbers;
+		void operator()(vector<number> &inp, std::vector<complex<number>> &roots, bool reverse=false){
+            if(inp.size() == 2){
+                reverse ?
+                    simpleEquation(inp[1], inp[0], roots):
+                    simpleEquation(inp[0], inp[1], roots);
+            }
+            if(inp.size() == 3){
+                reverse ?
+                    KahanQuadratic(inp[2], inp[1], inp[0], roots):
+                    KahanQuadratic(inp[0], inp[1], inp[2], roots);
+            }
+            else{
+                reverse ?
+                    operator()(inp[3], inp[2], inp[1], inp[0], roots):
+                    operator()(inp[0], inp[1], inp[2], inp[3], roots);
+            }
 		}
 	};
 }
