@@ -1,4 +1,4 @@
-NTESTS = -DNTESTS=1000000 # Number of tests
+NTESTS = -DNTESTS=5000000 # Number of tests
 
 All:framework.cpp Methods.h
 	g++ framework.cpp Methods.h -DMETHOD="Baydoun" $(NTESTS) -o Baydoun -std=c++20

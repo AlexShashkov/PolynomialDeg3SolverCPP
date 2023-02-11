@@ -297,9 +297,9 @@ namespace implementations{
 		 * 	\param a Коэффициент x^3.
 		 * 	\param b Коэффициент x^2.
 		 * 	\param c Коэффициент x.
-	\param d Коэффициент C.
+		 *	\param d Коэффициент C.
 		 * 	\param root: Вектор, который хранит корни уравнения.
-		*/
+		 */
 		void operator()(number a, number b, number c, number d,
 				vector<complex<number>> &roots){
 			// x^3, x^2, x, c
@@ -307,11 +307,10 @@ namespace implementations{
 			number *_c = new number[4];
 			number *_d = new number[3];
 			try{
-				// if(a != 0 && std::isfinite(a)){
-                b /= a;
-                c /= a;
-                d /= a;
-                a = 1;
+				b /= a;
+				c /= a;
+				d /= a;
+				a = 1;
 				if(anynotfinite(b, c, d)) throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
 				_b[0] = b; _c[0] = c; _d[0] = d;
 				number bcopy = b;
@@ -363,21 +362,21 @@ namespace implementations{
 		 * 	\param reverse Необходимо ли рассматривать коэффициенты в обратном порядке
 		*/
 		void operator()(vector<number> &inp, std::vector<complex<number>> &roots, bool reverse=false){
-            if(inp.size() == 2){
-                reverse ?
-                    simpleEquation(inp[1], inp[0], roots):
-                    simpleEquation(inp[0], inp[1], roots);
-            }
-            if(inp.size() == 3){
-                reverse ?
-                    KahanQuadratic(inp[2], inp[1], inp[0], roots):
-                    KahanQuadratic(inp[0], inp[1], inp[2], roots);
-            }
-            else{
-                reverse ?
-                    operator()(inp[3], inp[2], inp[1], inp[0], roots):
-                    operator()(inp[0], inp[1], inp[2], inp[3], roots);
-            }
+		    if(inp.size() == 2){
+			reverse ?
+			    simpleEquation(inp[1], inp[0], roots):
+			    simpleEquation(inp[0], inp[1], roots);
+		    }
+		    else if(inp.size() == 3){
+			reverse ?
+			    KahanQuadratic(inp[2], inp[1], inp[0], roots):
+			    KahanQuadratic(inp[0], inp[1], inp[2], roots);
+		    }
+		    else{
+			reverse ?
+			    operator()(inp[3], inp[2], inp[1], inp[0], roots):
+			    operator()(inp[0], inp[1], inp[2], inp[3], roots);
+		    }
 		}
 	};
 
@@ -395,7 +394,7 @@ namespace implementations{
 	class Vieta
 	{
 		// const number PI = static_cast<number>(_PI);
-        const number PI = std::numbers::pi_v<number>;
+		const number PI = std::numbers::pi_v<number>;
 		number sqrt3;
 		number onethree;
 
@@ -548,21 +547,21 @@ namespace implementations{
 		 * 	\param reverse Необходимо ли рассматривать коэффициенты в обратном порядке
 		*/
 		void operator()(vector<number> &inp, std::vector<complex<number>> &roots, bool reverse=false){
-            if(inp.size() == 2){
-                reverse ?
-                    simpleEquation(inp[1], inp[0], roots):
-                    simpleEquation(inp[0], inp[1], roots);
-            }
-            if(inp.size() == 3){
-                reverse ?
-                    KahanQuadratic(inp[2], inp[1], inp[0], roots):
-                    KahanQuadratic(inp[0], inp[1], inp[2], roots);
-            }
-            else{
-                reverse ?
-                    operator()(inp[3], inp[2], inp[1], inp[0], roots):
-                    operator()(inp[0], inp[1], inp[2], inp[3], roots);
-            }
+		    if(inp.size() == 2){
+			reverse ?
+			    simpleEquation(inp[1], inp[0], roots):
+			    simpleEquation(inp[0], inp[1], roots);
+		    }
+		    else if(inp.size() == 3){
+			reverse ?
+			    KahanQuadratic(inp[2], inp[1], inp[0], roots):
+			    KahanQuadratic(inp[0], inp[1], inp[2], roots);
+		    }
+		    else{
+			reverse ?
+			    operator()(inp[3], inp[2], inp[1], inp[0], roots):
+			    operator()(inp[0], inp[1], inp[2], inp[3], roots);
+		    }
 		}
 	};
 }
