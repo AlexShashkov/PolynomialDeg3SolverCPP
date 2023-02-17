@@ -119,6 +119,7 @@ namespace implementations{
             S = std::sqrt(d)*(sign(S) + (S==0)) + S;
             number Z1 = S/a;
             number Z2 = c/S;
+            if(anynotfinite(Z1, Z2)) throw std::invalid_argument("Полученные корни не определены.");
 
             roots = {Z1, Z2};
         }
@@ -182,8 +183,7 @@ namespace implementations{
 			number y = std::imag(inp);
 			if(x > 0) return std::atan2(y, x);
 			else{
-				number _pi = y < 0 ? -PI: PI;
-				return x == 0 ? _pi/static_cast<number>(2) : std::atan2(y, x) + _pi;
+				return x == 0 ? (y < 0 ? -PI: PI)/static_cast<number>(2) : std::atan2(y, x) + (y < 0 ? -PI: PI);
 			}
 		}
 
@@ -193,7 +193,7 @@ namespace implementations{
 		 * 	\param d Массив, в котором хранятся коэффициенты C.
 		 * 	\return Количество корней.
 		*/
-		inline int solve(number *b, number *c, number *d, vector<complex<number>> &roots){
+		inline void solve(number *b, number *c, number *d, vector<complex<number>> &roots){
 			number d0 = d[0];
 			number b0 = b[0];
 			number c0 = c[0];
@@ -207,7 +207,6 @@ namespace implementations{
 			// Вырожденный случай
 			if(o == 0 && r == 0){
 				roots = vector<complex<number>>{-bthree, -bthree, -bthree};
-				return 3;
 			}
 			else{
 				// Самые часто вызываемые степени
@@ -241,7 +240,7 @@ namespace implementations{
 
 				complex<number> bl = fma(sqrt1,tmp * fma(static_cast<number>(4)*b0c0,-tmp, fma(static_cast<number>(2),c2,d1)), sqrt2div9*t);
 				complex<number> bl1 = pow(bl, onethree);
-				complex<number> bl2 = pow(bl1, static_cast<number>(2));
+				complex<number> bl2 = pow(bl1, 2);
 				complex<number> A1 = fma(-sqrt2div3,static_cast<number>(2)*fma(b1, fma(static_cast<number>(2),d0,tmp1),fms(static_cast<number>(15), c0*d0, static_cast<number>(13),b0c1)),static_cast<number>(2)*c0*sqrt1); 
 				complex<number> A2 = fma(- sqrt1,sqrt2 *fma(static_cast<number>(2)*b0c0,fms(static_cast<number>(4),b0c0,static_cast<number>(5),d0), fma(static_cast<number>(3),d1,c2)),fma(static_cast<number>(1),
 					fms(static_cast<number>(2)*b1*d0, fms(b0, d0, static_cast<number>(-58), c1), static_cast<number>(8)*b2,fms(b0c0, tmp, static_cast<number>(-5), c2)),fms(b0c0, fms(static_cast<number>(23), c2, static_cast<number>(99), d1),
@@ -267,7 +266,7 @@ namespace implementations{
 				complex<number>  arg1_1 = A1*bl1;
 				complex<number>  arg1_2 = -partiond0*R1;
 				complex<number>  arg2_1 = A2*bl2;
-				complex<number>  arg2_2 = static_cast<number>(pow(partiond0, static_cast<number>(2)))*R2;
+				complex<number>  arg2_2 = static_cast<number>(pow(partiond0, 2))*R2;
 				
 				// Вычисляем аргумент комплексного числа
 				number phi1 = argp(arg1_1) - argp(arg1_2);
@@ -279,7 +278,6 @@ namespace implementations{
 					fma(M[0]*a1,R1,-fma(M[1]*a2,R2,bthree)),
 					fma(M[1]*a1,R1,-fma(M[0]*a2,R2,bthree))
 				};
-				return roots.size();
 			};
 		}
 
@@ -301,8 +299,8 @@ namespace implementations{
 		 * 	\param root: Вектор, который хранит корни уравнения.
 		 */
 		void operator()(number a, number b, number c, number d,
-				vector<complex<number>> &roots){
-			// x^3, x^2, x, c
+                vector<complex<number>> &roots){
+            // x^3, x^2, x, c
 			number *_b = new number[6];
 			number *_c = new number[4];
 			number *_d = new number[3];
@@ -515,7 +513,7 @@ namespace implementations{
 				}
 				else{
 					number R = std::fma(static_cast<number>(0.5), std::fma(-c, b_onethree, d), pow(b_onethree, 3));
-					auto Q3 = pow(Q, 3.0);
+					auto Q3 = pow(Q, 3);
 					auto S = std::fma(-R,R,Q3);
 					if(S==0 || !std::isfinite(S)){
 						roots = Degenerate(R, b, b_onethree);
