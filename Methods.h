@@ -12,25 +12,24 @@
 using namespace std::complex_literals;
 
 namespace implementations{
-    using std::complex;
-    using std::vector;
+	using std::complex;
+	using std::vector;
 	using std::fma;
 
 	/** \brief Check if at least one number is not finite
 	*/
-    template<typename ... T>
-    inline bool anynotfinite(T && ... t)
-    {
-        return ((!std::isfinite(t)) || ...);
-    }
+	template<typename ... T>
+	inline bool anynotfinite(T && ... t)
+	{
+		return ((!std::isfinite(t)) || ...);
+	}
 
 	/** \brief Sign
 	*/
 	template <typename number>
-    inline int sign(number val) {
-        if( number(0) < val){ return -1; }
-        else{ return 1;}
-    }
+	inline int sign(number val) {
+		return (number(0) < val) - (val < number(0));
+	}
 
 	/** \brief Fused multiply-substract
 	*/
@@ -193,7 +192,7 @@ namespace implementations{
 		 * 	\param d Массив, в котором хранятся коэффициенты C.
 		 * 	\return Количество корней.
 		*/
-		inline void solve(number *b, number *c, number *d, vector<complex<number>> &roots){
+		inline void solve(number b[6], number c[4], number d[3], vector<complex<number>> &roots){
 			number d0 = d[0];
 			number b0 = b[0];
 			number c0 = c[0];
@@ -299,11 +298,11 @@ namespace implementations{
 		 * 	\param root: Вектор, который хранит корни уравнения.
 		 */
 		void operator()(number a, number b, number c, number d,
-                vector<complex<number>> &roots){
-            // x^3, x^2, x, c
-			number *_b = new number[6];
-			number *_c = new number[4];
-			number *_d = new number[3];
+				vector<complex<number>> &roots){
+			// x^3, x^2, x, c
+			number _b[6];
+			number _c[4];
+			number _d[3];
 			try{
 				b /= a;
 				c /= a;
@@ -315,42 +314,31 @@ namespace implementations{
 				number ccopy = c;
 				number dcopy = d;
 
-				for (int i = 1; i < 6; i++){
-					bcopy *= b;
-					_b[i] = bcopy;
-				}
-				for (int i = 1; i < 4; i++){
-					ccopy *= c;
-					_c[i] = ccopy;
-				}
-				for (int i = 1; i < 3; i++){
-					dcopy *= d;
-					_d[i] = dcopy;
-				}
+				_b[1] = pow(b, 2);
+				_b[2] = pow(b, 3);
+				_b[3] = pow(b, 4);
+				_b[4] = pow(b, 5);
+				_b[5] = pow(b, 6);
+
+				_c[1] = pow(c, 2);
+				_c[2] = pow(c, 3);
+				_c[3] = pow(c, 4);
+
+				_d[1] = pow(d, 2);
+				_d[2] = pow(d, 3);
+
 				solve(_b, _c, _d, roots);
-				delete[] _b;
-				delete[] _c;
-				delete[] _d;
 			}
 			catch(const std::invalid_argument &err){
 				std::cerr << "Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
 				std::cerr << "Invalid argument was passed: " << err.what();
-				delete[] _b;
-				delete[] _c;
-				delete[] _d;
 			}
 			catch(const std::out_of_range &err){
 				std::cerr << "Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
 				std::cerr << "Out of range: " << err.what();
-				delete[] _b;
-				delete[] _c;
-				delete[] _d;
 			}
 			catch(...){
 				std::cerr << "!!! Error occured while working with " << a << " " << b << " " << c << " " << d << "\n";
-				delete[] _b;
-				delete[] _c;
-				delete[] _d;
 			}
 		}
 
@@ -425,6 +413,10 @@ namespace implementations{
 		inline vector<complex<number>> Usual(number Q, number Q3, number R, number b, number inp2three){
 			vector<complex<number>> roots;
 			number x1,x2,x3 = 0;
+
+
+			auto _acosarg = R/sqrt(Q3);
+			if(fabs(_acosarg) > 1) throw std::invalid_argument("Вызвана функция для действительных корней, но в acos |R/sqrt(Q^3)|>1!");
 			number phi = acos(R/sqrt(Q3))*onethree;
 			number sqrtQ = static_cast<number>(-2)*sqrt(Q);
 			number half = static_cast<number>(0.5);
@@ -462,13 +454,15 @@ namespace implementations{
 			if(sqrtabsQ3 == 0 || !std::isfinite(sqrtabsQ3)){
 				return {-inp2three, -inp2three, -inp2three};
 			}
+			number _aharg = fabs(R)/sqrtabsQ3;
 			if(Q > 0){
-				number phi = acosh(fabs(R)/sqrtabsQ3)*onethree;
+				if(_aharg < 1) throw std::invalid_argument("Вызвана функция для комплексных корней, но в acosh |R/sqrt(Q^3)|<1!");
+				number phi = acosh(_aharg)*onethree;
 				T = sqrtabsQ*cosh(phi);
 				sqrtsh = sqrt3*sqrtabsQ*sinh(phi);
 			}
 			else{
-				number phi = asinh(fabs(R)/sqrtabsQ3)*onethree;
+				number phi = asinh(_aharg)*onethree;
 				T = sqrtabsQ*sinh(phi);
 				sqrtsh = sqrt3*sqrtabsQ*cosh(phi);
 			}
@@ -496,13 +490,13 @@ namespace implementations{
 		 * 	\param root: Вектор, который хранит корни уравнения.
 		*/
 		void operator()(number a, number b, number c, number d,
-				vector<complex<number>> &roots){
+			vector<complex<number>> &roots){
 			// x^3, x^2, x, c
 			try{
-                b /= a;
-                c /= a;
-                d /= a;
-                a = 1;
+				b /= a;
+				c /= a;
+				d /= a;
+				a = 1;
 				if(anynotfinite(b, c, d)) throw std::invalid_argument("Коэффициент при x^3 равен нулю или б/м.");
 
 				number b_onethree = b*onethree;
@@ -560,7 +554,7 @@ namespace implementations{
 			    operator()(inp[3], inp[2], inp[1], inp[0], roots):
 			    operator()(inp[0], inp[1], inp[2], inp[3], roots);
 		    }
-		}
-	};
+	}
+};
 }
 #endif
