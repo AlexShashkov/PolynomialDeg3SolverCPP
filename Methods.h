@@ -54,9 +54,9 @@ namespace implementations{
 	*/
 	template<typename number>
 	inline complex<number> fma(complex<number> a, complex<number> b, complex<number> c) {
-    return {
+		return {
 			fms(a.real(), b.real(), a.imag(), b.imag()) + c.real(),
-            fma(a.real(), b.imag(), fma(a.imag(), b.real(), c.imag()))
+			fma(a.real(), b.imag(), fma(a.imag(), b.real(), c.imag()))
 		};
 	}
 
@@ -164,12 +164,11 @@ namespace implementations{
 	template <typename number>
 	class Baydoun
 	{
-		// const number PI = static_cast<number>(_PI);
-        const number PI = std::numbers::pi_v<number>;
-		number onethree;
-		number one27;
-		number sqrt3;
-		number cbrt4ftwo;
+		static constexpr number PI = std::numbers::pi_v<number>;
+		static constexpr number onethree = static_cast<number>(1.0L/3.0L);
+		static constexpr number one27 = pow(onethree, 3);
+		static constexpr number sqrt3 = static_cast<number>(std::sqrt(3L));
+		static constexpr number cbrt4ftwo = static_cast<number>(pow(4L, 1.0L/3.0L)*static_cast<number>(0.5));
 
 		/** \brief Аргумент комплексного числа. std::arg охватывает не все случаи
 		 * 	\param inp Комплексное число.
@@ -181,9 +180,9 @@ namespace implementations{
 			number x = std::real(inp);
 			number y = std::imag(inp);
 			if(x > 0) return std::atan2(y, x);
-			else{
-				return x == 0 ? (y < 0 ? -PI: PI)/static_cast<number>(2) : std::atan2(y, x) + (y < 0 ? -PI: PI);
-			}
+			else return x == 0 ?
+				(y < 0 ? -PI: PI)/static_cast<number>(2) :
+				std::atan2(y, x) + (y < 0 ? -PI: PI)	 ;
 		}
 
 		/** \brief Начало вычисления.
@@ -282,12 +281,6 @@ namespace implementations{
 
 	public:
 		Baydoun(){
-			long double _onethree = 1.0L/3.0L;
-
-			onethree = static_cast<number>(_onethree);
-			one27 = static_cast<number>(pow(_onethree, 3));
-			sqrt3 = static_cast<number>(std::sqrt(3L));
-			cbrt4ftwo = static_cast<number>(pow(4L, _onethree)*static_cast<number>(0.5));
 		}
 
 		/** \brief Функтор для решения уравнения методом Baydoun.
@@ -379,11 +372,9 @@ namespace implementations{
 	template <typename number>
 	class Vieta
 	{
-		// const number PI = static_cast<number>(_PI);
-		const number PI = std::numbers::pi_v<number>;
-		number sqrt3;
-		number onethree;
-
+		static constexpr number PI = std::numbers::pi_v<number>;
+		static constexpr number sqrt3 = sqrt(static_cast<number>(3.0));
+		static constexpr number onethree = static_cast<number>(1.0L/3.0L);
 
 		/** \brief Вырожденный случай.
 		 * 	\param R Вычисленное значение R.
@@ -478,8 +469,6 @@ namespace implementations{
 		}
 	public:
 		Vieta(){
-			number sqrt3 = sqrt(3.0);
-			number onethree = 1.0/3.0;
 		}
 
 		/** \brief Функтор для решения уравнения методом Виета.
@@ -489,8 +478,7 @@ namespace implementations{
 		 * 	\param d Коэффициент C.
 		 * 	\param root: Вектор, который хранит корни уравнения.
 		*/
-		void operator()(number a, number b, number c, number d,
-			vector<complex<number>> &roots){
+		void operator()(number a, number b, number c, number d, vector<complex<number>> &roots){
 			// x^3, x^2, x, c
 			try{
 				b /= a;
