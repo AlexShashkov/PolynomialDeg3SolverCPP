@@ -396,19 +396,15 @@ namespace implementations{
 
 		/** \brief Действительные корни.
 		 * 	\param Q Вычисленное значение Q.
-		 *	\param Q3 Вычисленное значение Q^3.
-		 *	\param R Вычисленное значение R.
 		 * 	\param b Коэффициент x^2
+		 * 	\param RQ3 R/sqrt(Q3)
 		 * 	\return Вектор, хранящий корни уравнения.
 		*/
-		inline vector<complex<number>> Usual(number Q, number Q3, number R, number b, number inp2three){
+		inline vector<complex<number>> Usual(number Q, number b, number inp2three, number RQ3){
 			vector<complex<number>> roots;
 			number x1,x2,x3 = 0;
 
-
-			auto _acosarg = R/sqrt(Q3);
-			if(fabs(_acosarg) > 1) throw std::invalid_argument("Вызвана функция для действительных корней, но в acos |R/sqrt(Q^3)|>1!");
-			number phi = acos(R/sqrt(Q3))*onethree;
+			number phi = acos(RQ3)*onethree;
 			number sqrtQ = static_cast<number>(-2)*sqrt(Q);
 			number half = static_cast<number>(0.5);
 			number _cos = cos(phi);
@@ -446,8 +442,7 @@ namespace implementations{
 				return {-inp2three, -inp2three, -inp2three};
 			}
 			number _aharg = fabs(R)/sqrtabsQ3;
-			if(Q > 0){
-				if(_aharg < 1) throw std::invalid_argument("Вызвана функция для комплексных корней, но в acosh |R/sqrt(Q^3)|<1!");
+			if(Q > 0 && _aharg >= 1){
 				number phi = acosh(_aharg)*onethree;
 				T = sqrtabsQ*cosh(phi);
 				sqrtsh = sqrt3*sqrtabsQ*sinh(phi);
@@ -497,11 +492,13 @@ namespace implementations{
 					number R = std::fma(static_cast<number>(0.5), std::fma(-c, b_onethree, d), pow(b_onethree, 3));
 					auto Q3 = pow(Q, 3);
 					auto S = std::fma(-R,R,Q3);
+
+					number RQ3 = R/sqrt(Q3);
 					if(S==0 || !std::isfinite(S)){
 						roots = Degenerate(R, b, b_onethree);
 					}
-					else if(S > 0){
-						roots = Usual(Q, Q3, R, b, b_onethree);
+					else if(S > 0 && fabs(RQ3) <= 1){
+						roots = Usual(Q, b, b_onethree, RQ3);
 					}
 					else{
 						roots = Complex(Q, Q3, R, b, b_onethree);
